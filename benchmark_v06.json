@@ -1,0 +1,52 @@
+{
+  "python": "3.13.5",
+  "results": {
+    "multiply": {
+      "program": "acc=0; repeat(x): acc=add(acc,y)",
+      "rounds": 2,
+      "verified_cases": 49,
+      "evaluations": 64,
+      "counterexamples": [
+        [
+          1,
+          0
+        ]
+      ],
+      "seconds": 0.000744
+    },
+    "negative_multiply": {
+      "program": "acc=0; repeat(x): acc=sub(acc,y)",
+      "rounds": 3,
+      "verified_cases": 49,
+      "evaluations": 83,
+      "counterexamples": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "seconds": 0.000756
+    },
+    "unrepresentable": {
+      "program": null,
+      "rounds": 3,
+      "verified_cases": 49,
+      "evaluations": 58,
+      "counterexamples": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "seconds": 0.00039
+    }
+  }
+}
