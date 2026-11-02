@@ -259,3 +259,30 @@ cover positive and deliberately incorrect candidates as well as subprocess
 timeouts, absence and malformed responses. See
 research/v26_independent_smt_validation.md for threat model and evidence
 boundaries. Comparative SOTA remains **unverified**.
+
+## v2.7 — Structural maximum synthesis and frozen comparative SyGuS harness
+
+`structural_max.py` recognizes the **exact declarative integer maximum
+contract** (every input is a lower bound, output equals some input) and
+constructs a comparison tree for **2–6 variables**. The theorem establishing
+uniqueness is straightforward, but this is a **specialized** synthesis path
+with exponentially growing AST size, not general-purpose invention. The
+previous general bounded CEGIS path remains limited to 1–4 inputs.
+
+`benchmark_v27.py` runs AlgoGenesis and optional cvc5 on an eleven-task
+SyGuS-Org selection, with source-byte SHA verification, subprocess timeouts,
+separate correctness validation by Z3, and preserved negative results.
+Original four cases and newly vendored max5/max6/max7/max8/small/VC22_a/
+VC22_b deliberately expose both coverage gains and unsupported cases.
+This is a curated smoke corpus, **not representative SyGuS-Comp coverage**.
+
+    python -m unittest discover -s tests -v
+    python structural_max.py benchmarks/sygus_clia_v27/max5.sl
+    python benchmark_v27.py --timeout 5 --repeats 3 --output benchmark_v27_results.json
+
+GitHub Actions runs an eleven-task one-repetition comparison and requires
+independent Z3 UNSAT proofs for max5 and max6. cvc5 is optional and lack of
+its binary is reported explicitly. The stored suite manifest, proof
+argument, falsification criteria and limitations are in
+`research/v27_generalization_benchmark.md`. No comparative SOTA claim is
+made from this result.
