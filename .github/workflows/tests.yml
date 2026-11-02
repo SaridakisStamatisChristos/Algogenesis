@@ -261,6 +261,35 @@ jobs:
           name: algogenesis-v36-blinded-native
           path: native_v36_evidence/v3*
           if-no-files-found: error
+      - name: Compare frozen v3.6 programs with scalar and AVX2 references
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count_max count_min sum_max sum_min; do
+            python native_comparators_v37.py --task "$task" --v36-result "native_v36_evidence/v36_$task.json" --repetitions 7 --output-dir native_v37_evidence
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              stem=Path('native_v37_evidence')/('v37_'+task)
+              r=json.loads(stem.with_suffix('.json').read_text())
+              assert r['status']=='expanded_comparison_complete'
+              assert r['native_verification']==r['ubsan']=='passed'
+              assert r['summary']['cells_total']==12 and r['raw_samples']==84
+              assert 'branchless_ns' in r['native_baselines']
+              assert ('avx2_ns' in r['native_baselines'])==r['avx2_available']
+              assert stem.with_suffix('.c').exists() and stem.with_suffix('.csv').exists()
+              assert not r['global_sota_claim']
+              print(task,r['summary'], 'AVX2',r['avx2_available'])
+          PY
+      - name: Publish all v3.7 comparator source, raw timing, and losses
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v37-native-competitors
+          path: native_v37_evidence/v37_*
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
