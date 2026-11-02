@@ -1,13 +1,20 @@
 # AlgoGenesis
 
-Algorithm discovery and program-synthesis research laboratory.
+Research laboratory for finite-domain program synthesis and algorithm discovery.
 
-Initial import: v0.6 research snapshot. See `releases/algogenesis_v0.6.zip` for the complete Python source, tests, benchmark outputs and original documentation.
+## Current GitHub import
 
-The archive is a research snapshot, **not** a state-of-the-art or production-readiness claim. To run tests after extracting:
+The initial repository import contains the v0.6 **dynamic-loop synthesizer** (`dynamic_synthesis.py`) and its dependency, the bounded register-machine interpreter (`control_flow.py`). The remainder of the v0.6 research snapshot is not yet imported. This is a partial import, not a complete source migration.
+
+## Run
+
+Python 3.10+ is required. From the repository root:
 
 ```bash
-python -m unittest discover -s algogenesis/tests -v
+python dynamic_synthesis.py
+python -m unittest discover -s tests -v
 ```
 
-The source will be unpacked into browsable repository files in a subsequent integration step.
+## Correctness scope
+
+Synthesis verifies candidate programs only on the supplied finite input domain. No general/unbounded proof, SOTA claim, or production-readiness claim is made.
