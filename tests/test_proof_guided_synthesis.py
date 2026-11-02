@@ -90,14 +90,14 @@ class ProofGuidedTests(unittest.TestCase):
         self.assertEqual(check_external_solution(source,result.solution).status,'proved')
 
     @unittest.skipUnless(shutil.which('z3'),'external Z3 required')
-    def test_multi_target_search_never_claims_proof_without_z3(self):
+    def test_multi_target_vc22_b_joint_solution_is_verified(self):
         source=(FIXTURES/'VC22_b.sl').read_text()
         result=synthesize_verified(source,max_candidates=160,max_wall_seconds=5)
-        if result.status=='proved':
-            self.assertEqual(check_external_solution(source,result.solution).status,'proved')
-        else:
-            self.assertIsNone(result.solution)
-            self.assertIn(result.status,('not_found_in_grammar','unverified','budget_exhausted'))
+        self.assertEqual(result.status,'proved',result)
+        self.assertIsNotNone(result.solution)
+        self.assertIn('(define-fun f1',result.solution)
+        self.assertIn('(define-fun f2',result.solution)
+        self.assertEqual(check_external_solution(source,result.solution).status,'proved')
 
 
 if __name__=='__main__':
