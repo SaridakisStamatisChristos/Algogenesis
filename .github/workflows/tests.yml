@@ -109,6 +109,37 @@ jobs:
           name: algogenesis-v31-genome-evolution
           path: v31_*.json
           if-no-files-found: error
+      - name: Compose and fuse four newly generated two-pass algorithms
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count_max count_min sum_max sum_min; do
+            python genome_crossover_v32.py --task "$task" --output "v32_two_$task.json" > /dev/null
+            python genome_fusion_v32.py --task "$task" --output "v32_fused_$task.json" > /dev/null
+          done
+          python - <<'PY'
+          import json
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              a=json.load(open('v32_two_'+task+'.json',encoding='utf-8'))
+              b=json.load(open('v32_fused_'+task+'.json',encoding='utf-8'))
+              assert a['status']==b['status']=='empirically_validated'
+              assert a['heldout_cases']==51 and a['prefix_candidates']==408
+              assert a['accepted_compositions']>0 and b['correct_candidates']>0
+              assert b['fused_heldout'][0]<b['two_pass_heldout'][0]
+              assert b['fused_heldout'][1]<b['two_pass_heldout'][1]
+              # Negative SOTA gate: do not suppress the stronger known algorithm.
+              assert b['fused_heldout'][0]>b['strong_one_pass_reference_comparisons']
+              assert not b['sota_claim'] and not a['global_sota_claim']
+              print(task,'two',a['heldout'],'fused',b['fused_heldout'],
+                    'one_pass_reference',b['strong_one_pass_reference_comparisons'])
+          PY
+      - name: Publish raw v3.2 compositional invention evidence
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v32-composition-and-fusion
+          path: v32_*.json
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30

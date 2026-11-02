@@ -94,6 +94,33 @@ See \`research/v31_structural_evolution.md\` for the transformation
 equivalence argument, fitness methodology, negative results,
 adversarial checks and constraints.
 
+## v3.2 — Multi-pass program crossover and loop fusion
+
+\`genome_crossover_v32.py\` now discovers typed **two-pass,
+multi-register array algorithms** by combining independently synthesized
+extrema reducers with v3.0/v3.1-generated accumulators. Capture-safe AST
+renaming creates four executable functions: \`count_max\`, \`count_min\`,
+\`sum_max\` and \`sum_min\`.
+
+\`genome_fusion_v32.py\` then searches for a semantically correct
+**one-pass fused algorithm**, reusing the actual reducer and accumulator
+operations. Correctness gates cover exhaustive small arrays, validation
+examples and 51 withheld cases; independent Python oracles and
+falsifying mutations challenge the results.
+
+On the withheld workload, the fused programs have fewer modeled
+comparisons and VM steps than their two-pass parents. **A separate
+correct one-pass reference is still significantly more comparison
+efficient**. Thus these results establish generative reach and
+measured internal improvement, **not SOTA**, universal proofs, or
+real-world execution-speed improvement.
+
+    python genome_crossover_v32.py --task count_max
+    python genome_fusion_v32.py --task count_max
+
+Detailed evidence, comparisons and limitations:
+\`research/v32_compositional_crossover.md\`.
+
 ## Run
 
 From the repository root:
