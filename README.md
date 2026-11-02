@@ -1,20 +1,57 @@
-# AlgoGenesis
+# AlgoGenesis v0.6 — Algorithm Discovery Research Laboratory
 
-Research laboratory for finite-domain program synthesis and algorithm discovery.
+AlgoGenesis is a **bounded research prototype**, not a general algorithm-discovery system and not an established SOTA result. This repository includes the sorting-network search tracks, integer-expression CEGIS, a bounded register-machine interpreter, and two loop-synthesis tracks.
 
-## Current GitHub import
-
-The initial repository import contains the v0.6 **dynamic-loop synthesizer** (`dynamic_synthesis.py`) and its dependency, the bounded register-machine interpreter (`control_flow.py`). The remainder of the v0.6 research snapshot is not yet imported. This is a partial import, not a complete source migration.
+**Python:** 3.10+; no external dependencies.
 
 ## Run
 
-Python 3.10+ is required. From the repository root:
+From the repository root:
 
 ```bash
-python dynamic_synthesis.py
 python -m unittest discover -s tests -v
+python algogenesis.py --width 4 --generations 200 --population 64 --seed 42
+python discovery.py --mode evolve --width 4 --generations 1000 --population 128 --seed 42
+python discovery.py --mode exact --width 4
+python advanced.py --mode benchmark --width 4 --trials 12 --generations 400 --population 80
+python program_synthesis.py --task absdiff --bound 3
+python program_synthesis.py --task maximum --bound 3
+python loop_synthesis.py
+python dynamic_synthesis.py
 ```
 
-## Correctness scope
+## Modules
 
-Synthesis verifies candidate programs only on the supplied finite input domain. No general/unbounded proof, SOTA claim, or production-readiness claim is made.
+| File | Purpose |
+| --- | --- |
+| `algogenesis.py` | v0.1 baseline-seeded evolutionary sorting-network search |
+| `discovery.py` | v0.2 unseeded evolution, bit-parallel zero-one verification, exact semantic BFS for widths 2–4 |
+| `advanced.py` | v0.3 semantic beam search, redundant-comparator pruning, independent scalar counterexamples, multi-seed benchmark |
+| `program_synthesis.py` | v0.4 enumerative integer-expression synthesis with observational-equivalence pruning and counterexample-guided inductive synthesis |
+| `control_flow.py` | v0.4 deterministic bounded register machine: integer expressions, comparisons, branches, bounded repeat, execution fuel |
+| `loop_synthesis.py` | v0.5 finite candidate grammar for accumulator programs with input-specialized loop counts |
+| `dynamic_synthesis.py` | v0.6 immutable AST with input-derived dynamic loop counts and finite-domain CEGIS |
+
+## Correctness and limitations
+
+A comparator network sorts every input over a totally ordered domain if it sorts all binary inputs of the same fixed width (zero-one principle). The bit-parallel verifier exhaustively checks those binary inputs. Exact BFS proves minimum comparator count only for widths 2–4; evolutionary and beam search do **not** establish optimality.
+
+Expression synthesis searches ASTs over integer variables/constants and `neg`, `abs`, `add`, `sub`, `min`, `max`. It verifies only the selected finite domain and restarts the search when new counterexamples invalidate observational equivalence.
+
+The interpreter has explicit fuel and bounded repeat counts; `loop_synthesis.py` specializes the AST to each input, whereas `dynamic_synthesis.py` builds one reusable AST with an input-dependent repeat bound. The dynamic synthesizer searches a small fixed family of accumulator programs and does not synthesize arbitrary loops, nested control flow, or loop invariants.
+
+The v0.6 finite-domain experiments synthesize multiplication and negative multiplication on nonnegative integer pairs in `[0,6]^2` (49 cases). `x*x+y*y` is outside the searched grammar and is not found.
+
+## Historical evidence
+
+- v0.2: unseeded evolution found a five-comparator width-four sorting network, 56,794 unique evaluations for seed 42.
+- v0.3: 12/12 width-four evolutionary trials found valid five-comparator networks; `benchmark_v03.json`.
+- v0.4: 22 tests passed locally; `cegis_absdiff_v04.json` and `cegis_max_v04.json` record finite-domain syntheses.
+- v0.5: 28 tests passed locally.
+- v0.6: 38 tests passed locally on Python 3.13.5; `benchmark_v06.json` records finite-domain results.
+
+The historical test transcripts `test_run_v04.txt`, `test_run_v05.txt`, and `test_run_v06.txt` are retained as evidence from prior local executions. These are **not** GitHub CI attestations. Rerun the suite on the current checkout to establish present correctness.
+
+## Research next steps
+
+Compositional loop and branch synthesis, invariant discovery, formal equivalence checks, diverse held-out tasks, and fair comparisons against established synthesis baselines are still required. No general-purpose algorithm invention, GPU acceleration, published SOTA result, or production readiness is claimed.
