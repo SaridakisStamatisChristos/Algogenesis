@@ -38,7 +38,7 @@ def _flatten_or(expr):
 def _recognize_max(problem: Problem) -> bool:
     names = problem.variables
     n = len(names)
-    if not 2 <= n <= 6 or len(problem.constraints) != n + 1:
+    if not 2 <= n <= 16 or len(problem.constraints) != n + 1:
         return False
     call = [problem.name, *names]
 
@@ -104,13 +104,56 @@ def synthesize_structural_max(problem: Problem) -> StructuralResult | None:
     The contract itself entails f(x) = max_i x_i over a total order.
     Run an independent solver to verify the emitted candidate as well.
     """
-    if not _recognize_max(problem):
+    if not _recognize_max(problem) or len(problem.variables) > 6:
         return None
     n = len(problem.variables)
     tree = _variable(n, 0)
     for index in range(1, n):
         tree = _append_challenger(tree, index, n)
     return StructuralResult(tree, 'exact-max-contract', n, tree.nodes())
+
+
+
+@dataclass(frozen=True)
+class FoldResult:
+    solution: str
+    rule: str
+    input_count: int
+    comparisons: int
+    source_bytes: int
+
+
+def synthesize_linear_max(problem: Problem) -> FoldResult | None:
+    """Build linear-size SMT-LIB let DAG for the fully recognized max family.
+
+    Defines t1 = ite(x0 < x1, x1, x0), then
+    ti = ite(t_(i-1) < xi, xi, t_(i-1)).
+    Each immutable let node is shared, so O(n) terms and n-1 comparisons
+    appear in the emitted program. This grammar is checked by the separate
+    independent Z3 external checker, not the old 4-input internal certifier.
+    """
+    if not _recognize_max(problem):
+        return None
+    names=problem.variables
+    used=set(names)|{problem.name}
+    prefix='_agmax'
+    while any(f'{prefix}{i}' in used for i in range(1,len(names))):
+        prefix='_'+prefix
+    bindings=[]
+    champion=names[0]
+    for index in range(1,len(names)):
+        alias=f'{prefix}{index}'
+        candidate=names[index]
+        expr=f'(ite (< {champion} {candidate}) {candidate} {champion})'
+        bindings.append((alias,expr))
+        champion=alias
+    body=champion
+    for alias,expr in reversed(bindings):
+        body=f'(let (({alias} {expr})) {body})'
+    args=' '.join(f'({name} Int)' for name in names)
+    source=f'(define-fun {problem.name} ({args}) Int {body})'
+    return FoldResult(source,'linear-let-max-fold',len(names),len(names)-1,
+                      len(source.encode('utf-8')))
 
 
 if __name__ == '__main__':
