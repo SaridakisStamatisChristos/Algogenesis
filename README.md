@@ -63,3 +63,11 @@ Compositional loop and branch synthesis, invariant discovery, formal equivalence
 `certificates.py` normalizes the restricted loop grammar to six exact polynomial coefficients (constant, x, y, x², xy, y²). Under its documented assumptions (nonnegative counts, immutable inputs, unbounded integer accumulator, no branching), coefficient equality is a mathematical equivalence certificate for **all nonnegative integer x,y**, not merely the training domain. This does not prove general program-synthesis correctness or SOTA.
 
 Run `python compositional.py`, `python certificates.py`, and `python -m unittest discover -s tests -v`. The local development tree passed 46 tests on Python 3.13.5. The GitHub Actions matrix is the independent repository verification gate.
+
+## v0.8 — Nested-loop synthesis and cubic polynomial certificates
+
+`nested_synthesis.py` synthesizes sequential accumulator updates containing one or two **nested** input-bounded loops. Its grammar represents degree-at-most-three integer polynomials through repeated addition/subtraction. The canonical ten-coefficient basis is `1,x,y,x²,xy,y²,x³,x²y,xy²,y³`.
+
+The `certify` function checks exact coefficient equality for all nonnegative integer inputs under these assumptions: immutable loop bounds, no branching or side effects, and an unbounded integer accumulator. Synthesis uses CEGIS, with an independent interpreter checking the finite domain. New tests cover `x³`, `x²y`, `xy²`, `y³`, `x³+y³`, adversarial invalid inputs, and independent random-program evaluation.
+
+Run `python nested_synthesis.py` and `python -m unittest discover -s tests -v`. The local v0.8 suite passed **51 tests**; GitHub CI is the separate repository gate. This is not general algorithm synthesis and does not establish SOTA.
