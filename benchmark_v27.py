@@ -118,8 +118,11 @@ def _verify_external(source: str, candidate: str, z3_timeout: float) -> tuple[st
 def _own_worker(path: Path) -> int:
     from sygus_clia import Result, parse_problem, synthesize, output, Unsupported
     from structural_max import synthesize_structural_max, synthesize_linear_max
+    from proof_guided_synthesis import synthesize_verified
+    source=path.read_text(encoding='utf-8')
+    report=None
     try:
-        problem=parse_problem(path.read_text(encoding='utf-8'))
+        problem=parse_problem(source)
         structural=synthesize_structural_max(problem)
         folded=synthesize_linear_max(problem) if structural is None else None
         if folded is not None:
@@ -133,15 +136,35 @@ def _own_worker(path: Path) -> int:
             else:
                 candidate=synthesize(problem,max_depth=3)
                 method='bounded-cegis'
-            if candidate.tree is None:
-                report={'status':candidate.status,'method':method}
-            else:
+            if candidate.tree is not None:
                 report={'status':'candidate','method':method,
                         'solution':output(problem,candidate),'checker':'restricted',
                         'internal_certificate':(
                             bool(candidate.certificate and candidate.certificate.proved))}
+            else:
+                report={'status':candidate.status,'method':method}
     except (Unsupported,ValueError,RuntimeError,RecursionError) as exc:
         report={'status':'unsupported','reason':str(exc)[:200]}
+    # Fallback is a generic bounded search over the ORIGINAL constraints,
+    # even when the pointwise-label synthesizer rejects underdetermination
+    # or helper-function syntax. Z3 UNSAT is the only acceptance gate.
+    if report['status']!='candidate':
+        try:
+            result=synthesize_verified(source,max_candidates=160,
+                                       max_wall_seconds=3.25,
+                                       solver_timeout_seconds=0.35)
+            if result.solution is not None and result.status=='proved':
+                report={'status':'candidate','method':'proof-guided-enumeration',
+                        'checker':'general','solution':result.solution,
+                        'enumerated':result.considered,
+                        'externally_verified_in_worker':True}
+            elif report['status'] in ('unsupported','not_found_in_grammar'):
+                report={'status':result.status,'method':'proof-guided-enumeration',
+                        'enumerated':result.considered,'reason':result.reason}
+        except (Unsupported,ValueError,RuntimeError,RecursionError) as exc:
+            report={'status':report['status'],
+                    'reason':str(exc)[:200],
+                    'method':'proof-guided-unavailable'}
     print(json.dumps(report,sort_keys=True))
     return 0
 
