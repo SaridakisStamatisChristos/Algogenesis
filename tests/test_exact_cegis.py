@@ -12,7 +12,7 @@ class ExactCegisTests(unittest.TestCase):
             branch(Guard('x','lt','y'),leaf(-1,1),leaf(1,-1)),
             branch(Guard('x','lt','zero'),leaf(),
                    branch(Guard('y','lt','zero'),leaf(),
-                          branch(Guard('x','lt','y'),leaf(1,0),leaf(0,1)))
+                          branch(Guard('x','lt','y'),leaf(1,0),leaf(0,1))))
         ]
         for reference in targets:
             with self.subTest(reference=reference):
