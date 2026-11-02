@@ -290,6 +290,37 @@ jobs:
           name: algogenesis-v37-native-competitors
           path: native_v37_evidence/v37_*
           if-no-files-found: error
+      - name: Generate and test new typed-select array algorithms
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count_max count_min sum_max sum_min; do
+            python genome_select_v38.py --task "$task" --max-profiles 6 --output-dir native_v38_evidence
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              r=json.loads((Path('native_v38_evidence')/('v38_'+task+'.json')).read_text())
+              assert r['status']=='select_genome_experiment_complete'
+              assert r['grammar_proposals']==1536 and r['finite_verified_new_genomes']>0
+              assert 2<=r['native_profiled_new']<=6
+              assert r['training_seed']!=r['holdout_seed']
+              assert r['independent_python_holdout_passed'] and r['independent_python_holdout_cases']==51
+              assert len(r['training_cells'])==6 and len(r['holdout_cells'])==12
+              assert r['profiles'][r['best_new_index']]['kind']=='new_select'
+              assert r['best_new_genome']!=r['v33_baseline_genome']
+              assert all(e['native_result']['ubsan']=='passed' for e in r['evaluations'].values())
+              assert not r['global_novelty_claim'] and not r['global_sota_claim']
+              print(task,r['selected_kind'],r['evaluations'][str(r['best_new_index'])]['summary'])
+          PY
+      - name: Publish v3.8 generated genomes, native timing and all losses
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v38-typed-select-genomes
+          path: native_v38_evidence/v3*
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
