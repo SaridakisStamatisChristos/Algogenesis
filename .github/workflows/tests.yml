@@ -23,6 +23,15 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y z3
           command -v z3
+      - name: Install optional cvc5 SyGuS comparison engine
+        if: matrix.python-version == '3.13'
+        run: |
+          if apt-cache show cvc5 >/dev/null 2>&1; then
+            sudo apt-get install -y cvc5
+            cvc5 --version
+          else
+            echo "cvc5 package unavailable: benchmark will record UNAVAILABLE"
+          fi
       - name: Compile all modules
         run: python -m compileall -q .
       - name: Run complete unit suite
@@ -34,3 +43,13 @@ jobs:
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
+      - name: Run v2.7 frozen 11-task comparison and independent proof gate
+        if: matrix.python-version == '3.13'
+        run: python benchmark_v27.py --timeout 5 --z3-timeout 15 --repeats 1 --output benchmark_v27_results.json --require-proved max5.sl,max6.sl,max7.sl,max8.sl,max16.sl
+      - name: Publish raw v2.7 benchmark results
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v27-comparison
+          path: benchmark_v27_results.json
+          if-no-files-found: warn

@@ -59,8 +59,8 @@ def parse_problem(text: str) -> Problem:
                 for item in cmd[2]):
                 raise Unsupported('only Int function arguments supported')
             variables = tuple(item[0] for item in cmd[2])
-            if len(set(variables)) != len(variables) or not 1 <= len(variables) <= 4:
-                raise Unsupported('between one and four distinct arguments required')
+            if len(set(variables)) != len(variables) or not 1 <= len(variables) <= 16:
+                raise Unsupported('between one and sixteen distinct arguments required')
         elif key == 'declare-var':
             if len(cmd) != 3 or cmd[2] != 'Int': raise Unsupported('only Int variables supported')
             if cmd[1] in declared: raise Unsupported('duplicate declared variable')
@@ -366,6 +366,8 @@ def _validate_tree(tree:Tree,n:int):
 def certify(problem:Problem,tree:Tree)->Certificate:
     """Exact order-cell proof for all integers, otherwise abstain."""
     n=len(problem.variables)
+    if n > 4:
+        raise Unsupported('internal weak-order certificate supports at most four arguments')
     _validate_tree(tree,n)
     identity=tuple(Affine(tuple(int(i==j) for i in range(n))) for j in range(n))
     env=dict(zip(problem.variables,identity))

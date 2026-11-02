@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "freeze": "2026-11-02",
+  "source_repository": "SyGuS-Org/benchmarks",
+  "source_commit": "13c8deb68a873635879c9a69bc78caebd340f646",
+  "selection": "Curated, prespecified extensions: original four CLIA cases plus max5-max8, independent width-16 max stress case, weakly constrained small, and two helper/multifunction VC22 tasks. NOT random or representative: special-family generalization and known unsupported cases are both disclosed.",
+  "benchmarks": [
+    {
+      "name": "max2.sl",
+      "file": "benchmarks/sygus_clia/max2.sl",
+      "upstream": "lib/CLIA_Track/from_2018/jmbl_fg_max2.sl",
+      "git_blob_sha": "da6f241315239f82c1d85eac3f40c7ebbbd0c03b"
+    },
+    {
+      "name": "max3.sl",
+      "file": "benchmarks/sygus_clia/max3.sl",
+      "upstream": "lib/CLIA_Track/from_2018/jmbl_fg_max3.sl",
+      "git_blob_sha": "b516e782ac02f1c2fc63bc3735f20e7a38fdbb93"
+    },
+    {
+      "name": "max4.sl",
+      "file": "benchmarks/sygus_clia/max4.sl",
+      "upstream": "lib/CLIA_Track/from_2018/jmbl_fg_max4.sl",
+      "git_blob_sha": "d7682dd5ad55c7dad26b5b98df8b16c1df7f49aa"
+    },
+    {
+      "name": "diff.sl",
+      "file": "benchmarks/sygus_clia/diff.sl",
+      "upstream": "lib/CLIA_Track/from_2018/diff.sl",
+      "git_blob_sha": "c9e770e1e88a904ce514319bf02f84c5ecb28a83"
+    },
+    {
+      "name": "max5.sl",
+      "file": "benchmarks/sygus_clia_v27/max5.sl",
+      "upstream": "comp/2017/CLIA_Track/fg_max5.sl",
+      "git_blob_sha": "5498d85151a7cb270a725f88c1d4b096f817c9ce"
+    },
+    {
+      "name": "max6.sl",
+      "file": "benchmarks/sygus_clia_v27/max6.sl",
+      "upstream": "comp/2017/CLIA_Track/fg_max6.sl",
+      "git_blob_sha": "d977f486c99b8ac8764cc9dbdb3eef6216b59bf3"
+    },
+    {
+      "name": "max7.sl",
+      "file": "benchmarks/sygus_clia_v27/max7.sl",
+      "upstream": "comp/2017/CLIA_Track/fg_max7.sl",
+      "git_blob_sha": "297664c3e485b011940e46acad237f9b93d92cfa"
+    },
+    {
+      "name": "max8.sl",
+      "file": "benchmarks/sygus_clia_v27/max8.sl",
+      "upstream": "comp/2017/CLIA_Track/fg_max8.sl",
+      "git_blob_sha": "1095d70e5b41fb270ad4a098da444b83be4162d2"
+    },
+    {
+      "name": "small.sl",
+      "file": "benchmarks/sygus_clia_v27/small.sl",
+      "upstream": "comp/2018/CLIA_Track/small.sl",
+      "git_blob_sha": "e7c052bfabc15d972df9d1ade4d74816b864c9bc"
+    },
+    {
+      "name": "VC22_a.sl",
+      "file": "benchmarks/sygus_clia_v27/VC22_a.sl",
+      "upstream": "comp/2018/CLIA_Track/jmbl_fg_VC22_a.sl",
+      "git_blob_sha": "e3e25314c1c35dda11e354c91a3425c1dd14b195"
+    },
+    {
+      "name": "VC22_b.sl",
+      "file": "benchmarks/sygus_clia_v27/VC22_b.sl",
+      "upstream": "comp/2018/CLIA_Track/jmbl_fg_VC22_b.sl",
+      "git_blob_sha": "87389ff4d30fbeab999c79c403f74d4ec63e0b0d"
+    },
+    {
+      "name": "max16.sl",
+      "file": "benchmarks/sygus_clia_v27/max16.sl",
+      "upstream": "comp/2018/CLIA_Track/max16.sl",
+      "git_blob_sha": "9c7fc6a31397566043b94be9278f0ad1985d8f02"
+    }
+  ]
+}

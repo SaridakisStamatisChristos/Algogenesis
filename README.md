@@ -259,3 +259,29 @@ cover positive and deliberately incorrect candidates as well as subprocess
 timeouts, absence and malformed responses. See
 research/v26_independent_smt_validation.md for threat model and evidence
 boundaries. Comparative SOTA remains **unverified**.
+
+## v2.7 — Scalable maximum-family synthesis and independent baseline validation
+
+The exact-maximum contract recognizer derives unique maximum semantics from
+source bounds and equality-to-an-input constraints. Two specialized forms
+are available: the original decision tree for 2–6 inputs, and a linear-size
+shared "let" comparison fold for 2–16 inputs (used by the v2.7 benchmark
+for max7/max8/max16). Its n−1 comparisons and O(n) emitted expressions
+avoid the original decision-tree's exponential AST duplication. Both
+variants receive independent Z3 checks before counting as proved.
+
+The frozen comparative corpus now includes 12 pinned official SyGuS tasks
+including max16, with byte-level provenance validation, isolated subprocess
+timeouts for AlgoGenesis and cvc5, independent Z3 checks of both engines,
+and raw CI artifacts. A separate verification-only SMT translator accepts
+cvc5's 'let', arithmetic guards, multiple definitions and source helper
+functions; this does not enlarge AlgoGenesis' general synthesis grammar.
+
+    python -m unittest discover -s tests -v
+    python structural_max.py benchmarks/sygus_clia_v27/max5.sl
+    python benchmark_v27.py --timeout 5 --repeats 3 --output benchmark_v27_results.json
+
+The general bounded CEGIS algorithm remains limited to 1–4 input
+variables. The max-fold is a specialized known algebraic family, NOT general
+algorithm invention or comparative SOTA. Full selection, proof obligations,
+negative results and limitations: research/v27_generalization_benchmark.md.
