@@ -19,6 +19,9 @@ from pathlib import Path
 from native_codegen_v34 import compile_genome, decode_genome
 
 TASKS=('count_max','count_min','sum_max','sum_min')
+NATIVE_LENGTHS=(16,128,1024)
+NATIVE_DISTRIBUTIONS=('uniform','duplicates','all_equal','increasing','decreasing','alternating')
+ALL_CELLS=frozenset((n,d) for n in NATIVE_LENGTHS for d in NATIVE_DISTRIBUTIONS)
 
 REFERENCE=r'''
 #include <inttypes.h>
@@ -136,10 +139,24 @@ int main(int argc,char **argv) {
         if(a<10000 || a>20000000) return 2;
         elements_per_sample=(size_t)a;
     }
+    unsigned mask=(1u<<18)-1u;
+    if(argc>3) {
+        char *end=NULL;
+        unsigned long parsed=strtoul(argv[3],&end,10);
+        if(!argv[3][0] || *end || parsed==0 || parsed>=(1ul<<18)) return 2;
+        mask=(unsigned)parsed;
+    }
+    if(argc>4) {
+        char *end=NULL;
+        unsigned long long parsed=strtoull(argv[4],&end,10);
+        if(!argv[4][0] || *end || parsed==0) return 2;
+        ag_rng=(uint64_t)parsed;
+    }
     static const char *names[]={"uniform","duplicates","all_equal","increasing","decreasing","alternating"};
     static const size_t sizes[]={16,128,1024};
     puts("distribution,length,repeat,generated_ns,better_first_ns,equal_first_ns");
     for(size_t j=0;j<3;j++) for(unsigned dist=0;dist<6;dist++) {
+        if(!(mask & (1u << (j*6+dist)))) continue;
         size_t n=sizes[j];
         fill(values,n,dist);
         size_t iters=elements_per_sample/n;
@@ -183,11 +200,21 @@ def _run(command, *, timeout=120):
 
 
 def run_benchmark(task='count_max',*,genome_json=None,compiler='gcc',
-                  repetitions=5,elements_per_sample=500000,output_dir=None):
+                  repetitions=5,elements_per_sample=500000,output_dir=None,
+                  cells=None,data_seed=None):
     if (task not in TASKS or type(repetitions) is not int or
             not 1<=repetitions<=100 or type(elements_per_sample) is not int or
             not 10000<=elements_per_sample<=20000000):
         raise ValueError('invalid native benchmark arguments')
+    if cells is None:
+        cells=ALL_CELLS
+    if not isinstance(cells,(set,frozenset)) or not cells or not cells<=ALL_CELLS:
+        raise ValueError('invalid native cell partition')
+    if data_seed is not None and (type(data_seed) is not int or not 0<data_seed<1<<64):
+        raise ValueError('invalid native data seed')
+    requested_cells=frozenset(cells)
+    cell_mask=sum(1<<(j*6+k) for j,n in enumerate(NATIVE_LENGTHS)
+                  for k,d in enumerate(NATIVE_DISTRIBUTIONS) if (n,d) in requested_cells)
     if not shutil.which(compiler):
         raise RuntimeError('C compiler not found: '+compiler)
     if genome_json is None:
@@ -216,13 +243,18 @@ def run_benchmark(task='count_max',*,genome_json=None,compiler='gcc',
               '-fno-sanitize-recover=all',str(path),'-o',str(sanitized)])
         if 'NATIVE_VERIFICATION_PASS' not in _run([str(sanitized),'--verify-only']):
             raise AssertionError('undefined behavior sanitizer gate failed')
-        raw=_run([str(executable),str(repetitions),str(elements_per_sample)])
+        command=[str(executable),str(repetitions),str(elements_per_sample),str(cell_mask)]
+        if data_seed is not None:
+            command.append(str(data_seed))
+        raw=_run(command)
     rows=list(csv.DictReader(io.StringIO(raw)))
-    if len(rows)!=18*repetitions:
+    if len(rows)!=len(requested_cells)*repetitions:
         raise AssertionError('missing raw native samples')
     cells=[]
-    for n in (16,128,1024):
-        for dist in ('uniform','duplicates','all_equal','increasing','decreasing','alternating'):
+    for n in NATIVE_LENGTHS:
+        for dist in NATIVE_DISTRIBUTIONS:
+            if (n,dist) not in requested_cells:
+                continue
             samples=[r for r in rows if r['distribution']==dist and int(r['length'])==n]
             values={key:statistics.median(float(r[key]) for r in samples)
                     for key in ('generated_ns','better_first_ns','equal_first_ns')}
@@ -239,6 +271,8 @@ def run_benchmark(task='count_max',*,genome_json=None,compiler='gcc',
             'source_sha256':sha256(source.encode()).hexdigest(),
             'program_origin':origin,'ubsan':'passed',
             'repetitions':repetitions,'elements_per_sample':elements_per_sample,
+            'cell_mask':cell_mask,'requested_cells':[list(c) for c in sorted(requested_cells)],
+            'data_seed':data_seed,
             'raw_samples':len(rows),'cells':cells,
             'summary':{'median_ratio_to_strong':statistics.median(ratios),
                        'cells_faster_than_strong':sum(r<1 for r in ratios),
@@ -247,7 +281,7 @@ def run_benchmark(task='count_max',*,genome_json=None,compiler='gcc',
             'native_baselines':['better-first','equal-first','two-pass verification oracle'],
             'global_sota_claim':False,'novel_algorithm_claim':False,
             'limitations':['repeated warm same-array microbenchmark',
-                'no unseen native selection/holdout tuning',
+                'the caller controls cell isolation and seed provenance',
                 'limited 4-task family and compiler machine',
                 'no native global optimum or hardware-speed proof']}
     if output_dir is not None:
