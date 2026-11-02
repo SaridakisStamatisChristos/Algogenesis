@@ -101,3 +101,57 @@ or failure; it is not a hidden release blocker.
 Next substantial advancement after v2.8 should be *solver-driven
 counterexample extraction*, sample replay and grammar-growth
 prioritization rather than increasing special-family templates.
+
+
+## Initial observed results (evidence: PR #3, run 41445327787)
+
+**Revision** \`eb21c20212e75cc541a76a53835d7f9f708063e8\`;
+Python 3.13.17 on GitHub's Linux x86_64 hosted runner;
+Z3 4.13.3, cvc5 1.3.2. Frozen, provenance-checked
+12-case manifest; one comparison repetition, five-second subprocess
+timeout per engine. The CI matrix passed (195 tests on 3.13 and the
+Python 3.10 suite). Raw CI artifact:
+https://github.com/SaridakisStamatisChristos/Algogenesis/actions/runs/41445327787
+
+| Benchmark | AlgoGenesis status | AlgoGenesis synthesis ms | cvc5 status | cvc5 synthesis ms |
+| --- | --- | ---: | --- | ---: |
+| max2 | proved | 51.80 | proved | 7.84 |
+| max3 | proved | 53.40 | proved | 8.52 |
+| max4 | proved | 51.36 | proved | 9.91 |
+| diff | proved | 55.42 | timeout | 5008.08 |
+| max5 | proved | 52.18 | proved | 12.19 |
+| max6 | proved | 53.98 | proved | 15.46 |
+| max7 | proved | 53.81 | proved | 21.84 |
+| max8 | proved | 56.14 | proved | 32.30 |
+| small | proved | 653.65 | proved | 87.81 |
+| VC22_a | proved | 229.89 | proved | 498.33 |
+| VC22_b | proved | 229.48 | timeout | 5008.10 |
+| max16 | proved | 50.31 | proved | 2700.93 |
+
+The new generic fallback produced these candidates (not benchmark-name
+special cases): \`small: (ite (< x y) y x)\`,
+\`VC22_a: (ite (= x1 x2) 0 1)\`,
+and **both** \`VC22_b\` synthesized functions equal
+\`(ite (= x1 x2) 0 1)\`. The independent SMT verifier returned
+UNSAT for the negation of the original constraints for each.
+
+**Interpretation:** 12/12 for AlgoGenesis, 10/12 for cvc5 within this
+specific five-second exploratory protocol. This is not a general
+solver capability or speed ranking. cvc5 is faster on most of the
+easy max cases and on small. The benchmark set is highly curated,
+contains known easy structural families, and the initial report has
+a single repetition. The later three-repetition CI gate is a
+reproducibility check, not a substitute for a broader blinded
+competition-quality benchmark.
+
+## Residual engineering obligations
+
+- Add genuine solver counterexample extraction / caching and evolve
+  syntax trees to make this more than bounded brute-force enumeration.
+- Expand source grammar and synth grammar while preserving external
+  check of the *original source*, not a lossy rewrite.
+- Perform independently sampled benchmarks against multiple available
+  current solvers; include time distribution, unsupported fractions
+  and resource caps.
+- Do not equate correct solutions on these 12 tasks with
+  a novel algorithmic discovery or general SOTA.
