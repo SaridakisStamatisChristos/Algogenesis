@@ -152,7 +152,7 @@ jobs:
           for task in ('count_max','count_min','sum_max','sum_min'):
               record=json.load(open('v33_'+task+'.json',encoding='utf-8'))
               assert record['status']=='empirically_validated'
-              assert record['generated_candidates']==384
+              assert record['generated_candidates']==768
               assert record['correct_training_validation']>0
               assert record['heldout_cases']==51
               assert record['heldout_only_for_reporting']
