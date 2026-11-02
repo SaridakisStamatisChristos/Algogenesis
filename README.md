@@ -115,3 +115,22 @@ invalid inputs, and deterministic replay. Run `python exact_cegis.py` or
 **Scope:** equivalence to an explicitly supplied reference program; no
 automatic extraction of a reference AST from arbitrary Python, no proof of
 general algorithm invention, and no established SOTA comparison.
+
+## v1.2 — Mutable-state recurrence synthesis
+
+`recurrence_synthesis.py` adds a loop-carried state register and synthesis of
+programs of the form `acc=a; state=s; repeat(x): acc+=sign*state; state+=delta`.
+The exact result is `a + sign*(s*x + delta*binomial(x,2))`. The certificate
+normalizes to coefficients of `(1,x,binomial(x,2))` and proves equivalence
+**between programs of this grammar** for all nonnegative integers, assuming
+unbounded arithmetic and immutable `x`.
+
+New tests compare the closed form with the independently executing register
+interpreter for random programs and held-out values. Synthesis is finite-domain
+oracle-guided; its returned polynomial certificate does not by itself prove
+equivalence to an arbitrary Python oracle outside the sample domain. The
+interpreter also enforces a per-loop bound of 10,000 and fuel limits, so its
+execution contract is narrower than the mathematical closed form.
+
+Run `python recurrence_synthesis.py` and
+`python -m unittest discover -s tests -v`. No SOTA claim is made.
