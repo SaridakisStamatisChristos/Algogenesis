@@ -3,7 +3,7 @@
   "freeze": "2026-11-02",
   "source_repository": "SyGuS-Org/benchmarks",
   "source_commit": "13c8deb68a873635879c9a69bc78caebd340f646",
-  "selection": "Curated, prespecified before v2.7 result collection: original four CLIA cases plus max5-max8, weakly constrained small, and two helper/multifunction VC22 tasks. NOT a random or representative sample; deliberately exposes parser and grammar failures.",
+  "selection": "Curated, prespecified extensions: original four CLIA cases plus max5-max8, independent width-16 max stress case, weakly constrained small, and two helper/multifunction VC22 tasks. NOT random or representative: special-family generalization and known unsupported cases are both disclosed.",
   "benchmarks": [
     {
       "name": "max2.sl",
@@ -70,6 +70,12 @@
       "file": "benchmarks/sygus_clia_v27/VC22_b.sl",
       "upstream": "comp/2018/CLIA_Track/jmbl_fg_VC22_b.sl",
       "git_blob_sha": "87389ff4d30fbeab999c79c403f74d4ec63e0b0d"
+    },
+    {
+      "name": "max16.sl",
+      "file": "benchmarks/sygus_clia_v27/max16.sl",
+      "upstream": "comp/2018/CLIA_Track/max16.sl",
+      "git_blob_sha": "9c7fc6a31397566043b94be9278f0ad1985d8f02"
     }
   ]
 }
