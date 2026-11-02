@@ -171,6 +171,35 @@ jobs:
           name: algogenesis-v33-headtail
           path: v33_*.json
           if-no-files-found: error
+      - name: Compile actual v3.3 algorithms to C11 and benchmark against strong native references
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          gcc --version | head -n 1
+          for task in count_max count_min sum_max sum_min; do
+            python native_benchmark_v34.py --task "$task" --genome-json "v33_$task.json" --repetitions 5 --elements-per-sample 500000 --output-dir native_v34_evidence
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              root=Path('native_v34_evidence')/('v34_'+task)
+              data=json.loads(root.with_suffix('.json').read_text(encoding='utf-8'))
+              assert data['status']=='native_validated' and data['ubsan']=='passed'
+              assert data['raw_samples']==90 and data['summary']['cells_total']==18
+              assert len(data['cells'])==18
+              assert all(cell['ratio_to_strong']>0 for cell in data['cells'])
+              assert not data['global_sota_claim'] and not data['novel_algorithm_claim']
+              assert root.with_suffix('.c').exists() and root.with_suffix('.csv').exists()
+              print(task, data['summary'])
+          PY
+      - name: Publish all v3.4 native sources, raw timings, and negative performance evidence
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v34-native-performance
+          path: native_v34_evidence/v34_*
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
