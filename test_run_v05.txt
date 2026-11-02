@@ -1,0 +1,33 @@
+test_beam (test_advanced.AdvancedTests.test_beam) ... ok
+test_counterexamples (test_advanced.AdvancedTests.test_counterexamples) ... ok
+test_invalid (test_advanced.AdvancedTests.test_invalid) ... ok
+test_pruning_semantics (test_advanced.AdvancedTests.test_pruning_semantics) ... ok
+test_reproducibility (test_advanced.AdvancedTests.test_reproducibility) ... ok
+test_bad_inputs_and_loops (test_control_flow.ControlFlowTests.test_bad_inputs_and_loops) ... ok
+test_branch (test_control_flow.ControlFlowTests.test_branch) ... ok
+test_loop (test_control_flow.ControlFlowTests.test_loop) ... ok
+test_adversarial (test_discovery.DiscoveryTests.test_adversarial) ... ok
+test_exact_optimal (test_discovery.DiscoveryTests.test_exact_optimal) ... ok
+test_independent_oracle_agrees (test_discovery.DiscoveryTests.test_independent_oracle_agrees) ... ok
+test_unseeded_reproducibility (test_discovery.DiscoveryTests.test_unseeded_reproducibility) ... ok
+test_baselines (test_engine.EngineTests.test_baselines) ... ok
+test_exhaustive_permutations (test_engine.EngineTests.test_exhaustive_permutations) ... ok
+test_mutation_invariants (test_engine.EngineTests.test_mutation_invariants) ... ok
+test_reject_invalid_width (test_engine.EngineTests.test_reject_invalid_width) ... ok
+test_reproducibility_and_correctness (test_engine.EngineTests.test_reproducibility_and_correctness) ... ok
+test_bad_domain (test_loop_synthesis.LoopTests.test_bad_domain) ... ok
+test_determinism (test_loop_synthesis.LoopTests.test_determinism) ... ok
+test_fuel_limit (test_loop_synthesis.LoopTests.test_fuel_limit) ... ok
+test_multiplication (test_loop_synthesis.LoopTests.test_multiplication) ... ok
+test_negative_multiplication (test_loop_synthesis.LoopTests.test_negative_multiplication) ... ok
+test_reject_unexpressible (test_loop_synthesis.LoopTests.test_reject_unexpressible) ... ok
+test_budget_and_input_validation (test_program_synthesis.ProgramSynthesisTests.test_budget_and_input_validation) ... ok
+test_counterexample_refines_spurious_solution (test_program_synthesis.ProgramSynthesisTests.test_counterexample_refines_spurious_solution) ... ok
+test_evaluation (test_program_synthesis.ProgramSynthesisTests.test_evaluation) ... ok
+test_no_solution_with_insufficient_size (test_program_synthesis.ProgramSynthesisTests.test_no_solution_with_insufficient_size) ... ok
+test_tasks (test_program_synthesis.ProgramSynthesisTests.test_tasks) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.385s
+
+OK
