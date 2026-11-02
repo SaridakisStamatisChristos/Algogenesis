@@ -216,3 +216,7 @@ Run `python -m unittest discover -s tests -q`.
 ## v2.2 — bounded online experts, stability gate and falsification
 
 `regret_forecast.py` adds a known, rigorously bounded multiplicative-weights expert-advice method using exact rational loss updates with two explicit quantization grids. `stability_selector.py` adds a distinct empirical selection strategy, and `regret_benchmark.py` compares the candidates on synthetic and five historical statsmodels series. The mathematical regret bound is restricted to predeclared bounded outcomes; it is **not forecasting SOTA**. Several real-data and synthetic comparisons favor simpler methods. See `research/v22_regret_and_falsification.md` for the proof, negative results and replication protocol.
+
+## v2.3 — Fixed-Share tracking regret with causal ARIMA/ETS benchmarks
+
+The new modules switching_experts.py and tracking_benchmark.py add exact-rational Fixed-Share tracking, a proven bound against expert paths with switches, an exact offline dynamic-programming comparator, and historical comparisons against persistence, ARIMA(1,1,0), simple exponential smoothing, and Holt trend smoothing. The tracking algorithm wins on a constructed changing-expert sequence but loses to statistical baselines on all five tested historical series. **No general SOTA result is claimed.** Reproduction, proof, negative results and evidence ledger: research/v23_switching_regret.md and research/v23_tracking_results.json.
