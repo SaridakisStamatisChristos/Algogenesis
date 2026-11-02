@@ -30,6 +30,37 @@ synthesis, independent correctness gates, Pareto performance discovery,
 and held-out algorithm tasks. See
 `research/v29_algorithm_invention.md` for the full evidence contract.
 
+## v3.0 — Typed Algorithm Genome (four algorithm families)
+
+The primary algorithm-generation track now includes
+\`algorithm_genome_v30.py\`: a **typed executable genome** with integer
+and Boolean expressions, mutable registers, conditional branches,
+array iteration with early exit, array reads/writes, and swaps.
+Programs are built from a compositional search grammar (not a table
+of complete solutions). The bounded generator has four targets:
+array membership, equal-element counting, array summation, and
+conditional array clamping.
+
+For example, membership can discover a short-circuit scan that reduces
+value comparisons versus an unconditional full scan; array clamping
+can reduce writes versus unconditional rewriting but pays for guards.
+Independent Python oracles and a separate withheld evaluation suite
+must accept every generated candidate. These are **operation counts**,
+not wall-clock performance or novel algorithm claims.
+This is the substrate for broader algorithm genomes; the current
+candidate generator is still deliberately small.
+
+\`\`\`bash
+python algorithm_genome_v30.py --task contains --output v30_contains.json
+python algorithm_genome_v30.py --task count --output v30_count.json
+python algorithm_genome_v30.py --task sum --output v30_sum.json
+python algorithm_genome_v30.py --task clamp --output v30_clamp.json
+\`\`\`
+
+See \`research/v30_typed_algorithm_genome.md\` for the
+training/validation/fitness/withheld split, typed runtime contract,
+falsification tests, and scope limitations.
+
 ## Run
 
 From the repository root:
