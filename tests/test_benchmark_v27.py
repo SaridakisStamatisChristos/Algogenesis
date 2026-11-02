@@ -14,8 +14,8 @@ class BenchmarkV27Tests(unittest.TestCase):
         doc=json.loads(DEFAULT_MANIFEST.read_text(encoding='utf-8'))
         self.assertEqual(doc['source_commit'],
                          '13c8deb68a873635879c9a69bc78caebd340f646')
-        self.assertEqual(len(doc['benchmarks']),11)
-        self.assertEqual(len({x['name'] for x in doc['benchmarks']}),11)
+        self.assertEqual(len(doc['benchmarks']),12)
+        self.assertEqual(len({x['name'] for x in doc['benchmarks']}),12)
         for item in doc['benchmarks']:
             with self.subTest(item=item['name']):
                 path=(ROOT/item['file']).resolve()
