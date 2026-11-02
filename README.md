@@ -125,7 +125,7 @@ Detailed evidence, comparisons and limitations:
 
 AlgoGenesis now adds a **typed, checked loop-start index** to
 \`foreach\` (defaulting to zero, fully backward compatible). The
-\`genome_headtail_v33.py\` generator searches 384 complete typed
+\`genome_headtail_v33.py\` generator searches 768 complete typed
 program structures for each extrema-aggregation task. It combines
 nonempty-input guards, first-element initialization, one-pass
 tail iteration, comparator orientation, conditional order and
