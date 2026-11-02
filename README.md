@@ -176,6 +176,31 @@ python native_benchmark_v34.py --task count_max \
 See \`research/v34_native_codegen_benchmarks.md\` for full
 methodology, limitations, toolchain, strong comparator and next steps.
 
+## v3.5 — Native-Guided Algorithm Genome Selection
+
+\`native_autotune_v35.py\` closes the loop between **automated typed
+program synthesis** and **actual measured native CPU latency**.
+It independently checks candidates from the existing 768-genome
+grammar, then profiles up to six verified variants in C. Selection
+depends only on six predeclared tuning cells; final evaluation reports
+twelve different workload cells. Both selected and original v3.3
+genomes are benchmarked; every loss and candidate rejection is
+preserved, together with raw timings and generated C sources.
+
+The evaluation set is held out from *ranking logic*, not physically
+unmeasured during preliminary profiling; shared microbenchmarks
+are not proof of cross-host generalization. No favorable score is
+required for CI success, and no global SOTA is claimed.
+
+\`\`\`bash
+python native_autotune_v35.py --task count_max \
+  --max-profiles 6 --output-dir native_v35_evidence
+\`\`\`
+
+See \`research/v35_native_guided_genome_selection.md\` for the
+full scientific protocol, fairness limitations, and remaining
+SOTA requirements.
+
 ## Run
 
 From the repository root:

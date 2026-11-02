@@ -200,6 +200,39 @@ jobs:
           name: algogenesis-v34-native-performance
           path: native_v34_evidence/v34_*
           if-no-files-found: error
+      - name: Native-guided genome search and heldout reporting for four array algorithms
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count_max count_min sum_max sum_min; do
+            python native_autotune_v35.py --task "$task" --max-profiles 6 --training-repetitions 3 --training-elements 150000 --final-repetitions 5 --final-elements 500000 --output-dir native_v35_evidence
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              data=json.loads((Path('native_v35_evidence')/('v35_'+task+'.json')).read_text(encoding='utf-8'))
+              assert data['status']=='native_experiment_complete'
+              assert data['grammar_proposals']==768
+              assert data['finite_verified_genomes']>=2
+              assert 2<=data['native_profiled']<=6
+              assert data['heldout_selected']['cells_total']==12
+              assert data['heldout_v33']['cells_total']==12
+              assert data['selected_native_result']['ubsan']=='passed'
+              assert data['baseline_native_result']['ubsan']=='passed'
+              assert len(data['training_cells'])==6 and len(data['evaluation_cells'])==12
+              assert not data['selected_on_heldout'] and not data['global_sota_claim']
+              assert len(data['profiled_candidates'])==data['native_profiled']
+              print(task, 'chosen',data['selected_index'],'holdout',
+                    data['heldout_selected'],'v33',data['heldout_v33'])
+          PY
+      - name: Publish v3.5 native selection, full candidate record and all benchmark losses
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v35-native-autotuning
+          path: native_v35_evidence/v3*
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
