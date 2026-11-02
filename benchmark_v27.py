@@ -117,23 +117,29 @@ def _verify_external(source: str, candidate: str, z3_timeout: float) -> tuple[st
 
 def _own_worker(path: Path) -> int:
     from sygus_clia import Result, parse_problem, synthesize, output, Unsupported
-    from structural_max import synthesize_structural_max
+    from structural_max import synthesize_structural_max, synthesize_linear_max
     try:
         problem=parse_problem(path.read_text(encoding='utf-8'))
         structural=synthesize_structural_max(problem)
-        if structural is not None:
-            candidate=Result(structural.tree,0,0,0,None,'candidate')
-            method=structural.rule
+        folded=synthesize_linear_max(problem) if structural is None else None
+        if folded is not None:
+            report={'status':'candidate','method':folded.rule,
+                    'solution':folded.solution,'checker':'general',
+                    'comparisons':folded.comparisons}
         else:
-            candidate=synthesize(problem,max_depth=3)
-            method='bounded-cegis'
-        if candidate.tree is None:
-            report={'status':candidate.status,'method':method}
-        else:
-            report={'status':'candidate','method':method,
-                    'solution':output(problem,candidate),
-                    'internal_certificate':(
-                        bool(candidate.certificate and candidate.certificate.proved))}
+            if structural is not None:
+                candidate=Result(structural.tree,0,0,0,None,'candidate')
+                method=structural.rule
+            else:
+                candidate=synthesize(problem,max_depth=3)
+                method='bounded-cegis'
+            if candidate.tree is None:
+                report={'status':candidate.status,'method':method}
+            else:
+                report={'status':'candidate','method':method,
+                        'solution':output(problem,candidate),'checker':'restricted',
+                        'internal_certificate':(
+                            bool(candidate.certificate and candidate.certificate.proved))}
     except (Unsupported,ValueError,RuntimeError,RecursionError) as exc:
         report={'status':'unsupported','reason':str(exc)[:200]}
     print(json.dumps(report,sort_keys=True))
@@ -153,7 +159,13 @@ def _algogenesis(path: Path, timeout: float, source: str,
     if payload['status']!='candidate':
         return _record_status(payload['status'],result['elapsed_ns'],
                               payload.get('reason',''))
-    proof,reason=_verify(source,payload['solution'],z3_timeout)
+    checker=payload.get('checker')
+    if checker=='general':
+        proof,reason=_verify_external(source,payload['solution'],z3_timeout)
+    elif checker=='restricted':
+        proof,reason=_verify(source,payload['solution'],z3_timeout)
+    else:
+        return _record_status('error',result['elapsed_ns'],'invalid checker selector')
     return _record_status('proved' if proof=='proved' else 'unverified',
                           result['elapsed_ns'],reason,proof,payload['solution']) | {
                           'method':payload['method']}
