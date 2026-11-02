@@ -162,3 +162,28 @@ unsampled inputs. No comparative SOTA benchmark has been established.
 
 Run `python coupled_recurrence.py` and
 `python -m unittest discover -s tests -q`.
+
+## v1.4 — General affine transition inference
+
+`affine_transition.py` identifies integer matrices `A` and integer bias
+vectors `b` from complete observed state trajectories satisfying
+`s_(n+1) = A*s_n + b`. Exact `fractions.Fraction` Gaussian elimination
+finds the unique integer transition when the augmented observation
+matrix `[s_n,1]` has full column rank. Inconsistent, underdetermined,
+or nonintegral traces return an explicit failure reason.
+
+The independent `power(initial,n)` evaluator computes the same state via
+exponentiation of the augmented transition matrix in `O(d^3 log n)`
+arithmetic operations, compared against direct iteration in randomized
+tests. `certify(left,right)` checks equality of complete transition
+matrices, sufficient for equality of all trajectories from all integer
+initial states. This is **not** a certificate that an unknown oracle
+obeys the inferred transition outside its observed trace.
+
+Tests: Fibonacci state machine, three interacting registers, randomized
+matrix-power differential checks, inconsistent/underdetermined traces,
+and invalid inputs. Run `python -m unittest discover -s tests -q`.
+
+Limitations: full state observations required; uniqueness may fail for
+a single trajectory; exact integer arithmetic may grow large; no
+piecewise/nonlinear dynamics or comparative SOTA results are claimed.
