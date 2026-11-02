@@ -1,0 +1,20 @@
+{
+  "task": "absdiff",
+  "expression": "abs((x - y))",
+  "ast_nodes": 4,
+  "rounds": 3,
+  "evaluations": 52,
+  "counterexamples": [
+    [
+      -3,
+      -2
+    ],
+    [
+      -2,
+      -3
+    ]
+  ],
+  "verified": true,
+  "domain_size": 49,
+  "verification_scope": "exhaustive finite domain only"
+}
