@@ -73,6 +73,42 @@ jobs:
           name: algogenesis-v30-typed-genome
           path: v30_*.json
           if-no-files-found: error
+      - name: Evolve four typed algorithm genomes with independent heldout gate
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count contains sum clamp; do
+            python genome_evolution_v31.py --task "$task" --output "v31_$task.json" > /dev/null
+          done
+          python - <<'PY'
+          import json
+          records={t:json.load(open('v31_'+t+'.json',encoding='utf-8'))
+                   for t in ('count','contains','sum','clamp')}
+          count=records['count']
+          before=count['heldout']['base']
+          after=count['heldout']['evolved']
+          assert count['status']=='empirically_validated'
+          assert count['heldout']['cases']==51
+          assert after[0]==before[0] and after[2]<before[2]*0.90
+          assert any('predicate-increment-to-branch' in h['rule']
+                     for h in count['history'])
+          contains=records['contains']
+          assert contains['fitness']['evolved'][0]<contains['fitness']['base'][0]
+          assert contains['heldout']['evolved'][0]==contains['heldout']['base'][0]
+          for task in ('sum','clamp'):
+              assert records[task]['status']=='no_fitness_improvement'
+          for task,record in records.items():
+              assert record['heldout']['cases']==51
+              assert record['finite_scope_only'] and not record['global_novelty_claim']
+              print(task,record['status'],record['heldout'])
+          PY
+      - name: Publish raw v3.1 structural evolution artifacts
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v31-genome-evolution
+          path: v31_*.json
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
