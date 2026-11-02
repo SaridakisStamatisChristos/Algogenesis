@@ -233,6 +233,34 @@ jobs:
           name: algogenesis-v35-native-autotuning
           path: native_v35_evidence/v3*
           if-no-files-found: error
+      - name: Run v3.6 selection-isolated native experiment
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count_max count_min sum_max sum_min; do
+            python native_blinded_v36.py --task "$task" --max-profiles 6 --output-dir native_v36_evidence
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              r=json.loads((Path('native_v36_evidence')/('v36_'+task+'.json')).read_text())
+              assert r['status']=='blinded_native_experiment_complete'
+              assert len(r['selection_cells'])==6 and len(r['holdout_cells'])==12
+              assert r['selection_data_seed']!=r['holdout_data_seed']
+              assert all(len(p['selection_result']['cells'])==6 for p in r['profiled_candidates'] if 'score' in p)
+              assert r['selected_native_result']['raw_samples']==60
+              assert r['baseline_native_result']['ubsan']=='passed'
+              assert not r['global_sota_claim']
+              print(task,r['selected_index'],r['holdout_selected'])
+          PY
+      - name: Publish v3.6 blinded native protocol, source, timings and losses
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v36-blinded-native
+          path: native_v36_evidence/v3*
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
