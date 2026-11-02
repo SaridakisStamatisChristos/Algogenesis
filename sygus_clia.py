@@ -59,8 +59,8 @@ def parse_problem(text: str) -> Problem:
                 for item in cmd[2]):
                 raise Unsupported('only Int function arguments supported')
             variables = tuple(item[0] for item in cmd[2])
-            if len(set(variables)) != len(variables) or not 1 <= len(variables) <= 6:
-                raise Unsupported('between one and six distinct arguments required')
+            if len(set(variables)) != len(variables) or not 1 <= len(variables) <= 16:
+                raise Unsupported('between one and sixteen distinct arguments required')
         elif key == 'declare-var':
             if len(cmd) != 3 or cmd[2] != 'Int': raise Unsupported('only Int variables supported')
             if cmd[1] in declared: raise Unsupported('duplicate declared variable')
