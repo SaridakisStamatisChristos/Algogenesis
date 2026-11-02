@@ -59,23 +59,22 @@ def _git_revision() -> str:
 def _candidate_from_output(text: str) -> str | None:
     """Accept a single define-fun, including the optional one-element wrapper.
 
-    Non-parseable or multi-function outputs cannot be counted as verified.
+    Non-parseable outputs cannot be counted as verified; multi-function
+    output is supported only if every top-level form is a define-fun.
     """
     from sygus_clia import parse_sexpressions
     try:
         roots = parse_sexpressions(text)
     except ValueError:
         return None
-    if len(roots) != 1:
-        return None
-    item = roots[0]
-    if isinstance(item,list) and len(item)==1 and isinstance(item[0],list):
-        item = item[0]
-    if not isinstance(item,list) or not item or item[0]!='define-fun':
+    if len(roots)==1 and isinstance(roots[0],list) and roots[0] and isinstance(roots[0][0],list):
+        roots = roots[0]
+    if not roots or any(not isinstance(item,list) or not item or
+                        item[0]!='define-fun' for item in roots):
         return None
     def sexpr(node):
         return '('+' '.join(sexpr(v) for v in node)+')' if isinstance(node,list) else str(node)
-    return sexpr(item)
+    return '\n'.join(sexpr(item) for item in roots)
 
 
 def _run_subprocess(argv: list[str], timeout: float, *, source: str | None = None) -> dict:
@@ -100,6 +99,17 @@ def _verify(source: str, candidate: str, z3_timeout: float) -> tuple[str,str]:
     from sygus_clia import Unsupported
     try:
         result=check_with_smt(source,candidate,solver='z3',timeout_seconds=z3_timeout)
+        return result.status,result.detail
+    except (ValueError,TypeError,Unsupported,RecursionError) as exc:
+        return 'unverified_grammar',str(exc)[:300]
+
+
+def _verify_external(source: str, candidate: str, z3_timeout: float) -> tuple[str,str]:
+    """Use the broader verification-only reader for cvc5, not the synthesis grammar."""
+    from sygus_general_checker import check_external_solution
+    from sygus_clia import Unsupported
+    try:
+        result=check_external_solution(source,candidate,timeout_seconds=z3_timeout)
         return result.status,result.detail
     except (ValueError,TypeError,Unsupported,RecursionError) as exc:
         return 'unverified_grammar',str(exc)[:300]
@@ -160,7 +170,7 @@ def _cvc5(path: Path, timeout: float, source: str,
     if candidate is None:
         return _record_status('unverified',result['elapsed_ns'],
                               'cvc5 output was not one recognized define-fun')
-    proof,reason=_verify(source,candidate,z3_timeout)
+    proof,reason=_verify_external(source,candidate,z3_timeout)
     return _record_status('proved' if proof=='proved' else 'unverified',
                           result['elapsed_ns'],reason,proof,candidate)
 
