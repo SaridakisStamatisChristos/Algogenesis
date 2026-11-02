@@ -97,3 +97,21 @@ is not a formally verified proof assistant.
 
 Run `python -m unittest discover -s tests -v`. Local verification: 61 tests
 passed on Python 3.13. GitHub CI provides separate revision-specific evidence.
+
+## v1.1 — Exact counterexample-guided synthesis
+
+`exact_cegis.py` connects the finite-example conditional synthesizer with the
+exact piecewise-affine equivalence checker. Given a **reference AST** in the
+supported grammar, the algorithm proposes a candidate from current examples,
+asks the exact checker whether it agrees on *all integer input pairs*, and,
+if not, adds the checker's concrete integer counterexample before searching
+again. Only exactly certified candidates are returned as successful.
+
+The `tests/test_exact_cegis.py` suite covers exact max/min/absdiff/clamp
+synthesis, counterexample learning, insufficient grammar, resource exhaustion,
+invalid inputs, and deterministic replay. Run `python exact_cegis.py` or
+`python -m unittest discover -s tests -v`.
+
+**Scope:** equivalence to an explicitly supplied reference program; no
+automatic extraction of a reference AST from arbitrary Python, no proof of
+general algorithm invention, and no established SOTA comparison.
