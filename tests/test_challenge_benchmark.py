@@ -16,8 +16,8 @@ class ChallengeBenchmarkTests(unittest.TestCase):
             self.assertEqual(metrics["cases"],36)
             self.assertGreaterEqual(metrics["median_ns"],0)
         self.assertEqual(summary["berlekamp_massey"]["covered"],36)
-        self.assertEqual(summary["hankel"]["exact"],24)
-        self.assertEqual(summary["berlekamp_massey"]["exact"],24)
+        self.assertEqual(summary["hankel"]["exact"],30)
+        self.assertEqual(summary["berlekamp_massey"]["exact"],30)
         self.assertEqual(summary["persistence"]["exact"],0)
     def test_reject_bad_parameters(self):
         for kwargs in ({"train":1},{"horizon":0},{"train":60,"horizon":8},{"repeats":0}):
