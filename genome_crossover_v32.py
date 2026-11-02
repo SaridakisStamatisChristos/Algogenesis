@@ -142,6 +142,16 @@ def _cases(seed):
     rng = random.Random(seed)
     validation = tuple((tuple(rng.randint(-30, 30) for _ in range(n)), 0)
                        for n in (0, 1, 2, 4, 8, 16, 64, 128) for _ in range(4))
+    # Preserve four truly disjoint sets, including empty-array duplicate cases.
+    seen_validation = set(training) | set(fitness)
+    distinct_validation = []
+    for values, key in validation:
+        while (values, key) in seen_validation:
+            values = tuple(v + 2**80 for v in values)
+            key += 2**80
+        seen_validation.add((values, key))
+        distinct_validation.append((values, key))
+    validation = tuple(distinct_validation)
     rng = random.Random(seed + 10319)
     hold = tuple((tuple(rng.randint(-10**12, 10**12) for _ in range(n)), 0)
                  for n in (0, 1, 2, 4, 8, 16, 64, 128) for _ in range(4))
