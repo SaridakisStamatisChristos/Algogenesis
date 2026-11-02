@@ -61,6 +61,39 @@ See \`research/v30_typed_algorithm_genome.md\` for the
 training/validation/fitness/withheld split, typed runtime contract,
 falsification tests, and scope limitations.
 
+## v3.1 — Structural Evolution of Typed Algorithms
+
+The new \`genome_evolution_v31.py\` evolves **complete typed executable
+program ASTs** produced by the v3.0 generator. Recursive mutations edit
+expressions, register initializations, loop direction and termination,
+conditional branches, statement structure, and array writes. A
+generic Boolean-to-conditional-lowering rule allows the search to
+discover an improved occurrence-counting program rather than
+retrieving a hardcoded optimized implementation.
+
+**Correctness:** static type checks, finite training and validation
+corpora, independent Python oracles, and 51 withheld evaluation cases.
+**Fitness:** comparisons, array writes and modeled interpreter steps
+(lexicographically ordered by task). **Baseline:** the original
+v3.0-generated genome evaluated on precisely the same cases.
+
+The first bounded experiment reduces \`count\` interpreter steps with
+identical comparisons. A membership optimization seen on training
+fitness **does not generalize** to the held-out corpus; that negative
+result is preserved. No wall-clock speed, SOTA, global proof or
+algorithmic novelty is claimed.
+
+\`\`\`bash
+python genome_evolution_v31.py --task count --output v31_count.json
+python genome_evolution_v31.py --task contains --output v31_contains.json
+python genome_evolution_v31.py --task sum --output v31_sum.json
+python genome_evolution_v31.py --task clamp --output v31_clamp.json
+\`\`\`
+
+See \`research/v31_structural_evolution.md\` for the transformation
+equivalence argument, fitness methodology, negative results,
+adversarial checks and constraints.
+
 ## Run
 
 From the repository root:
