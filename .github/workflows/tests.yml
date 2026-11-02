@@ -50,6 +50,29 @@ jobs:
           name: algogenesis-v29-algorithm-invention
           path: invention_v29_width6.json
           if-no-files-found: warn
+      - name: Generate four typed genome algorithms with independent test gates
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in contains count sum clamp; do
+            python algorithm_genome_v30.py --task "$task" --output "v30_$task.json" > /dev/null
+          done
+          python - <<'PY'
+          import json
+          for task in ('contains','count','sum','clamp'):
+              r=json.load(open('v30_' + task + '.json', encoding='utf-8'))
+              assert r['status']=='empirically_validated' and r['heldout_cases']==51
+              assert r['genome'] is not None
+              print(task, r['candidate_count'],
+                    r['mean_comparisons'], r['mean_array_writes'])
+          PY
+      - name: Publish v3.0 typed genome source-result evidence
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v30-typed-genome
+          path: v30_*.json
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
