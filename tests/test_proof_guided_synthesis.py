@@ -62,8 +62,8 @@ class ProofGuidedTests(unittest.TestCase):
                 synthesize_verified(source,max_candidates=bad)
         for bad in (
             source+'(assert false)',
-            source.replace('(synth-fun f ((x Int) (y Int)) Int)',
-                           '(synth-fun f ((x Int) (y Int)) Int ((Start Int (x))))')
+            source.replace('(synth-fun f ((x Int) (y Int)) Int',
+                           '(synth-fun f ((x Int) (y Int)) Int ((Start Int (x)))')
         ):
             if bad==source:
                 self.fail('mutation did not modify test source')
