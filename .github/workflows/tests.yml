@@ -321,6 +321,34 @@ jobs:
           name: algogenesis-v38-typed-select-genomes
           path: native_v38_evidence/v3*
           if-no-files-found: error
+      - name: Synthesize two-lane partial-summary algorithms
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count_max count_min sum_max sum_min; do
+            python genome_striped_v39.py --task "$task" --output-dir native_v39_evidence
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              r=json.loads((Path('native_v39_evidence')/('v39_'+task+'.json')).read_text())
+              assert r['status']=='striped_genome_generated'
+              assert r['grammar_proposals']==1536 and r['finite_verified_genomes']>0
+              assert r['independent_python_holdout_cases']==51
+              assert r['native_result']['ubsan']=='passed'
+              assert r['native_summary']['cells_total']==12
+              assert r['selected_genome']['statements'][2]['then'][0]['cond']['args'][0]['op']=='band'
+              assert not r['global_novelty_claim'] and not r['global_sota_claim']
+              print(task,r['finite_verified_genomes'],r['native_summary'])
+          PY
+      - name: Publish v3.9 striped source, ASTs, timing and losses
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v39-striped-summary
+          path: native_v39_evidence/v3*
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
