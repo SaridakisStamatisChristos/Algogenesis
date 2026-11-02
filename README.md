@@ -134,3 +134,31 @@ execution contract is narrower than the mathematical closed form.
 
 Run `python recurrence_synthesis.py` and
 `python -m unittest discover -s tests -v`. No SOTA claim is made.
+
+## v1.3 — Interacting registers and cubic recurrence discovery
+
+`coupled_recurrence.py` synthesizes a **three-register, loop-carried**
+triangular recurrence. Its update order is `acc += b; b += a; a += delta`
+inside `repeat(n)`, with integer initial values. This computes exactly
+
+`acc(n) = acc0 + b0*n + a0*binomial(n,2) + delta*binomial(n,3)`
+
+for every nonnegative integer `n` in the unbounded-integer mathematical
+model. Finite differences of oracle values at `n=0,1,2,3` recover the
+four binomial-basis coefficients. Remaining domain samples are checked
+against the closed form **and** the independent register interpreter.
+A non-cubic oracle is rejected when observations expose the mismatch.
+
+The test suite checks `n^3`, tetrahedral numbers, sums of squares,
+random recurrences, negative coefficients, determinism, malformed
+inputs, budget exhaustion, and the interpreter's loop bound. The
+interpreter's `repeat` limit is 10,000 and its fuel is finite;
+these runtime limits do not apply to the mathematical identity.
+
+**Evidence boundary:** The certificate proves equivalence between
+programs of this exact recurrence grammar when coefficients agree.
+It does not prove equivalence to an arbitrary black-box oracle on
+unsampled inputs. No comparative SOTA benchmark has been established.
+
+Run `python coupled_recurrence.py` and
+`python -m unittest discover -s tests -q`.
