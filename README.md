@@ -55,3 +55,11 @@ The historical test transcripts `test_run_v04.txt`, `test_run_v05.txt`, and `tes
 ## Research next steps
 
 Compositional loop and branch synthesis, invariant discovery, formal equivalence checks, diverse held-out tasks, and fair comparisons against established synthesis baselines are still required. No general-purpose algorithm invention, GPU acceleration, published SOTA result, or production readiness is claimed.
+
+## v0.7 — Compositional synthesis and symbolic proof certificates
+
+`compositional.py` synthesizes up to two sequential input-bounded accumulator loops with observational-equivalence pruning and CEGIS. Its interpreter is independent from its search-time arithmetic signature evaluator. It discovers programs for `x*y+x`, `x*y+y`, `x*x+y*y`, `2*x*y`, and `x*x-y*y` over a 25-case nonnegative input domain.
+
+`certificates.py` normalizes the restricted loop grammar to six exact polynomial coefficients (constant, x, y, x², xy, y²). Under its documented assumptions (nonnegative counts, immutable inputs, unbounded integer accumulator, no branching), coefficient equality is a mathematical equivalence certificate for **all nonnegative integer x,y**, not merely the training domain. This does not prove general program-synthesis correctness or SOTA.
+
+Run `python compositional.py`, `python certificates.py`, and `python -m unittest discover -s tests -v`. The local development tree passed 46 tests on Python 3.13.5. The GitHub Actions matrix is the independent repository verification gate.
