@@ -187,3 +187,28 @@ and invalid inputs. Run `python -m unittest discover -s tests -q`.
 Limitations: full state observations required; uniqueness may fail for
 a single trajectory; exact integer arithmetic may grow large; no
 piecewise/nonlinear dynamics or comparative SOTA results are claimed.
+
+## v1.5 — Output-only linear recurrence inference
+
+`observable_recurrence.py` infers the smallest **uniquely identified**
+homogeneous linear recurrence of order at most `max_order` from a scalar
+sequence using exact rational Hankel-system elimination. No internal state
+registers are required. The solver requires at least as many independent
+equations as unknown coefficients, plus an additional observation by
+the configured order limit. Inconsistent or underdetermined systems
+are rejected, not silently filled with arbitrary parameters.
+
+The `LinearRecurrence` model generates further terms exactly using
+`fractions.Fraction`. Regression tests cover Fibonacci, geometric
+sequences, cubic sequences (fourth-order recurrence), rational
+coefficients, insufficient rank, malformed inputs, and deliberately
+adversarial continuations.
+
+**Critical evidence limit:** fitting any finite sequence does not prove
+that the unknown source obeys the recurrence indefinitely. The result
+is a uniquely determined model **within the chosen grammar and
+observations**, not proof of hidden implementation recovery. In
+particular, a sufficiently high-order model can overfit a short trace.
+No general nonlinear state inference or SOTA claim is made.
+
+Run `python -m unittest discover -s tests -q`.
