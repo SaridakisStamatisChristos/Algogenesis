@@ -86,6 +86,14 @@ def infer(expr: Expr, env: dict[str, str]) -> str:
         return env[expr.value]
     if expr.op == 'read' and len(expr.args) == 1 and infer(expr.args[0], env) == 'int':
         return 'int'
+    if expr.op == 'select' and len(expr.args) == 3:
+        condition, yes, no = expr.args
+        if infer(condition, env) != 'bool':
+            raise InvalidGenome('select condition must be Boolean')
+        branch_type = infer(yes, env)
+        if infer(no, env) != branch_type or branch_type not in ('int', 'bool'):
+            raise InvalidGenome('select branch sort mismatch')
+        return branch_type
     signatures = {
         'add': (('int', 'int'), 'int'), 'sub': (('int', 'int'), 'int'),
         'eq': (('int', 'int'), 'bool'), 'lt': (('int', 'int'), 'bool'),
@@ -199,6 +207,8 @@ class Machine:
                 return not evaluate(e.args[0])
             if e.op == 'btoi':
                 return int(evaluate(e.args[0]))
+            if e.op == 'select':
+                return evaluate(e.args[1] if evaluate(e.args[0]) else e.args[2])
             if e.op == 'and':
                 return evaluate(e.args[0]) and evaluate(e.args[1])
             if e.op == 'or':

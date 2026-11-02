@@ -88,6 +88,7 @@ class _Emitter:
             return names[e.value]
         args=[self.expr(x,names) for x in e.args]
         if e.op=='read':return 'ag_read(data,n,'+args[0]+')'
+        if e.op=='select':return '(('+args[0]+') ? ('+args[1]+') : ('+args[2]+'))'
         if e.op=='not':return '(!'+args[0]+')'
         if e.op=='btoi':return '(('+args[0]+') ? 1 : 0)'
         ops={'add':'+','sub':'-','eq':'==','lt':'<','and':'&&','or':'||'}
