@@ -1,0 +1,20 @@
+{
+  "task": "maximum",
+  "expression": "max(x, y)",
+  "ast_nodes": 3,
+  "rounds": 3,
+  "evaluations": 28,
+  "counterexamples": [
+    [
+      -3,
+      -2
+    ],
+    [
+      -2,
+      -3
+    ]
+  ],
+  "verified": true,
+  "domain_size": 49,
+  "verification_scope": "exhaustive finite domain only"
+}
