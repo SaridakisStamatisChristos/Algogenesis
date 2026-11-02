@@ -40,6 +40,16 @@ jobs:
         run: python discovery.py --mode exact --width 4
       - name: Smoke-test dynamic synthesis
         run: python dynamic_synthesis.py
+      - name: Discover six-wire parallel sorting algorithm and independently verify
+        if: matrix.python-version == '3.13'
+        run: python algorithm_invention_v29.py --width 6 --stages 5 --comparators 12 --beam 256 --output invention_v29_width6.json
+      - name: Publish raw v2.9 algorithm invention artifact
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v29-algorithm-invention
+          path: invention_v29_width6.json
+          if-no-files-found: warn
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
