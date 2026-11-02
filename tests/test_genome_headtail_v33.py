@@ -20,7 +20,7 @@ class HeadTailTests(unittest.TestCase):
         for task, result in self.results.items():
             with self.subTest(task=task):
                 self.assertEqual(result.status, 'empirically_validated')
-                self.assertEqual(result.proposed, 384)
+                self.assertEqual(result.proposed, 768)
                 self.assertGreater(result.proved_by_testing, 0)
                 self.assertEqual(result.heldout_cases, 51)
                 self.assertEqual(result.genome.statements[1].start, 1)
@@ -95,7 +95,7 @@ class HeadTailTests(unittest.TestCase):
         self.assertFalse(set(d)&set(b))
         self.assertFalse(set(d)&set(c))
         self.assertEqual(discover_headtail('count_max'),self.results['count_max'])
-        self.assertEqual(len(list(candidates())),384)
+        self.assertEqual(len(list(candidates())),768)
 
     def test_bounded_search_does_not_forge_success(self):
         with self.assertRaises(RuntimeError):
