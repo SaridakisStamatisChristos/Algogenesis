@@ -77,3 +77,23 @@ Run `python nested_synthesis.py` and `python -m unittest discover -s tests -v`. 
 `branch_synthesis.py` adds bounded-depth conditional program synthesis with affine leaves and comparisons over x, y, and zero. Search uses semantic partition memoization and counterexample-guided refinement; verification runs the generated AST through the independent `control_flow.Interpreter`. Tests cover max, min, absolute difference, conditional sign, and two-level clamp, with held-out inputs outside the training range. Finite-domain evidence and held-out testing do not prove unbounded correctness or establish SOTA.
 
 Run `python branch_synthesis.py` and `python -m unittest discover -s tests -v`.
+
+## v1.0 — Exact conditional-program equivalence (RFP + UCS-Pro R7)
+
+`branch_certificates.py` proves equivalence of two supported `branch_synthesis.Node`
+programs **for all integer pairs** `(x, y)` by partitioning the plane along
+`x=0`, `y=0`, and `x=y`. The 13 relatively open cells comprise six 2D
+sectors, six 1D rays, and the origin. Both programs are affine on each cell;
+checking three non-collinear witnesses per sector, two distinct witnesses
+per ray, and one at the origin is sufficient for equality throughout each
+cell. An inequality returns a concrete integer counterexample.
+
+The certificate assumes affine integer leaves, guards `lt/le/eq` comparing
+only `x`, `y`, and `zero`, and pure unbounded-integer semantics. It does not
+prove correctness against arbitrary Python oracle functions; it proves
+**equivalence of two explicitly represented decision trees**. The independent
+`control_flow.Interpreter` is also exercised on held-out inputs. The checker
+is not a formally verified proof assistant.
+
+Run `python -m unittest discover -s tests -v`. Local verification: 61 tests
+passed on Python 3.13. GitHub CI provides separate revision-specific evidence.
