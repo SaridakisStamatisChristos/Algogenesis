@@ -25,7 +25,7 @@ containing:
 - two comparator orderings (better-first or equality-first);
 - two loop directions.
 
-This gives 384 candidate *program structures*. A candidate consists
+This gives 768 candidate *program structures*. A candidate consists
 of two integer registers, a guarded first-element initialization
 (\`0 < length\`, then read element 0), and a tail loop from index 1.
 The reset, addition, ordering and comparison direction are selected
