@@ -92,3 +92,35 @@ unfavorable outcomes, and optimize a genuinely general synthesis mechanism.
 **Evidence gate:** tests present are not tests passed until actual CI execution
 logs at the exact candidate SHA have been inspected. Results belong in the
 published JSON artifact, not in unverified claims in this document.
+
+
+## v2.7 extension — DAG representation and baseline verification coverage
+
+The initial audited 11-task run established 6/11 AlgoGenesis solutions and
+9/11 cvc5 solutions as independently Z3-verified at a five-second wall
+timeout. Some cvc5 solutions used let-bound affine guards and helper
+functions; a verification-only parser now reserializes their original
+source constraints and candidate definitions into a guarded SMT-LIB query.
+No source-provided assertions, options or arbitrary commands are emitted.
+Malformed, unsupported and ambiguous texts remain unverified.
+
+To test the representational scaling limit without the 2^n decision-tree
+expansion, synthesize_linear_max emits shared SMT-LIB 'let' temporaries
+for n<=16. After processing k inputs the champion register equals their
+maximum, by induction: the next guard selects max(champion, x_(k+1)).
+This yields n-1 comparisons and O(n) textual and DAG size, with n-1
+runtime comparison steps. The proof argument applies to a totally ordered
+domain and the exact recognized source contract. Z3 is the independent
+external proof gate, not a substitute for the structural argument.
+
+The challenge corpus was extended from 11 to 12 cases by including the
+pinned official 2018 CLIA max16 task; the selected family remains
+overrepresented and cannot establish general-purpose synthesis SOTA.
+The old internal certifier is still limited to <=4 inputs, and the
+general CEGIS synthesizer to <=4 inputs: admitting up to 16 *parsed*
+arguments is not the same as a 16-variable general synthesis capability.
+
+Interpret results on the 12-task suite separately from the historical
+11-task results. The v2.7 extension increases the number of solvable
+max-family tasks, while off-family tasks such as weakly specified small
+and the complex VC22 templates remain substantive capability gaps.
