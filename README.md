@@ -285,3 +285,24 @@ The general bounded CEGIS algorithm remains limited to 1–4 input
 variables. The max-fold is a specialized known algebraic family, NOT general
 algorithm invention or comparative SOTA. Full selection, proof obligations,
 negative results and limitations: research/v27_generalization_benchmark.md.
+
+
+## v2.8 — Bounded proof-guided enumeration for underconstrained SyGuS
+
+A new fallback searches a finite, task-independent grammar of constants,
+variables, arithmetic and guarded \`ite\` expressions. It does **not**
+require the original specification to determine a unique pointwise output.
+For one or two integer synth-funs (up to two arguments, shared names if
+multiple targets), candidates are independently checked by Z3 against
+**every original source constraint**. Helper functions and joint targets
+can be handled by this fallback via the verification-only SMT translator.
+An UNSAT result is required for a success; missing solver, timeout,
+unknown, unsupported syntax and budget exhaustion are not proofs.
+
+The original strict CEGIS and structural maximum pathways are retained,
+with proof-guided enumeration used as a bounded fallback. The frozen
+v2.7 12-task benchmark is reused for an apples-to-apples v2.8 comparison,
+and the results are uploaded by CI. This is neither a complete SyGuS
+solver nor comparative SOTA. See
+\`research/v28_proof_guided_synthesis.md\` for the proof obligation,
+grammar boundaries, negative controls and execution instructions.
