@@ -41,6 +41,7 @@ class Stmt:
     reverse: bool = False
     stop_if: Expr | None = None
     other: Expr | None = None
+    start: int = 0  # foreach begins at this inclusive index; legacy default unchanged
 
 
 @dataclass(frozen=True)
@@ -125,6 +126,8 @@ def type_check(program: Genome) -> None:
             for child in s.then + s.otherwise:
                 verify_stmt(child, inside_loop)
         elif s.op == 'foreach':
+            if type(s.start) is not int or not 0 <= s.start <= 10000:
+                raise InvalidGenome('invalid foreach start index')
             if inside_loop:
                 raise InvalidGenome('nested loops outside v3.0 bounded grammar')
             if s.stop_if is not None and infer(s.stop_if, env) != 'bool':
@@ -222,8 +225,8 @@ class Machine:
                 elif stmt.op == 'if':
                     execute(stmt.then if evaluate(stmt.cond) else stmt.otherwise)
                 elif stmt.op == 'foreach':
-                    indices = (range(len(data) - 1, -1, -1) if stmt.reverse
-                               else range(len(data)))
+                    indices = (range(len(data) - 1, stmt.start - 1, -1) if stmt.reverse
+                               else range(stmt.start, len(data)))
                     for index in indices:
                         tick()
                         env['index'], env['item'] = index, data[index]
