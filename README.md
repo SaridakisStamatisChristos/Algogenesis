@@ -71,3 +71,9 @@ Run `python compositional.py`, `python certificates.py`, and `python -m unittest
 The `certify` function checks exact coefficient equality for all nonnegative integer inputs under these assumptions: immutable loop bounds, no branching or side effects, and an unbounded integer accumulator. Synthesis uses CEGIS, with an independent interpreter checking the finite domain. New tests cover `x³`, `x²y`, `xy²`, `y³`, `x³+y³`, adversarial invalid inputs, and independent random-program evaluation.
 
 Run `python nested_synthesis.py` and `python -m unittest discover -s tests -v`. The local v0.8 suite passed **51 tests**; GitHub CI is the separate repository gate. This is not general algorithm synthesis and does not establish SOTA.
+
+## v0.9 — Conditional synthesis
+
+`branch_synthesis.py` adds bounded-depth conditional program synthesis with affine leaves and comparisons over x, y, and zero. Search uses semantic partition memoization and counterexample-guided refinement; verification runs the generated AST through the independent `control_flow.Interpreter`. Tests cover max, min, absolute difference, conditional sign, and two-level clamp, with held-out inputs outside the training range. Finite-domain evidence and held-out testing do not prove unbounded correctness or establish SOTA.
+
+Run `python branch_synthesis.py` and `python -m unittest discover -s tests -v`.
