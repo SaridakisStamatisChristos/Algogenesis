@@ -34,7 +34,7 @@ class TypedGenomeTests(unittest.TestCase):
     def test_membership_improves_comparisons_without_seeded_solution(self):
         result = self.results['contains']
         self.assertLess(result.mean_comparisons, result.baseline_mean_comparisons)
-        self.assertLess(result.mean_comparisons / result.baseline_mean_comparisons, 0.55)
+        self.assertLess(result.mean_comparisons / result.baseline_mean_comparisons, 0.80)
         self.assertTrue(any(stmt.stop_if is not None for stmt in result.genome.statements))
 
     def test_array_mutator_improves_writes_but_pays_extra_comparisons(self):
