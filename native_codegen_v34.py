@@ -91,7 +91,7 @@ class _Emitter:
         if e.op=='select':return '(('+args[0]+') ? ('+args[1]+') : ('+args[2]+'))'
         if e.op=='not':return '(!'+args[0]+')'
         if e.op=='btoi':return '(('+args[0]+') ? 1 : 0)'
-        ops={'add':'+','sub':'-','eq':'==','lt':'<','and':'&&','or':'||'}
+        ops={'add':'+','sub':'-','band':'&','eq':'==','lt':'<','and':'&&','or':'||'}
         if e.op not in ops:raise UnsupportedNativeGenome('unsupported expression')
         return '('+args[0]+' '+ops[e.op]+' '+args[1]+')'
 

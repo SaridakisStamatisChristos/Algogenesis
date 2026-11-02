@@ -96,6 +96,7 @@ def infer(expr: Expr, env: dict[str, str]) -> str:
         return branch_type
     signatures = {
         'add': (('int', 'int'), 'int'), 'sub': (('int', 'int'), 'int'),
+        'band': (('int', 'int'), 'int'),
         'eq': (('int', 'int'), 'bool'), 'lt': (('int', 'int'), 'bool'),
         'and': (('bool', 'bool'), 'bool'), 'or': (('bool', 'bool'), 'bool'),
         'not': (('bool',), 'bool'), 'btoi': (('bool',), 'int'),
@@ -221,6 +222,8 @@ class Machine:
                 return left + right
             if e.op == 'sub':
                 return left - right
+            if e.op == 'band':
+                return left & right
             raise AssertionError('typing missed expression')
 
         for name, _, initial in genome.registers:
