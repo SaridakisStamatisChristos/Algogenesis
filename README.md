@@ -121,6 +121,29 @@ real-world execution-speed improvement.
 Detailed evidence, comparisons and limitations:
 \`research/v32_compositional_crossover.md\`.
 
+## v3.3 — Efficient Head/Tail One-Pass Algorithm Synthesis
+
+AlgoGenesis now adds a **typed, checked loop-start index** to
+\`foreach\` (defaulting to zero, fully backward compatible). The
+\`genome_headtail_v33.py\` generator searches 768 complete typed
+program structures for each extrema-aggregation task. It combines
+nonempty-input guards, first-element initialization, one-pass
+tail iteration, comparator orientation, conditional order and
+accumulator arithmetic, without inserting any hand-written
+solution programs into the search.
+
+Four task families are independently tested against Python oracles.
+Acceptance requires **strictly fewer modeled comparisons and VM steps**
+than v3.2's fused program on separate withheld arrays and a fair
+comparison against a stronger one-pass reference. All original proof
+and genome regression suites remain part of CI.
+
+    python genome_headtail_v33.py --task count_max --output v33_count_max.json
+
+See \`research/v33_headtail_synthesis.md\` for the invariant proof
+obligations, external benchmark limitations, adversarial tests
+and honest novelty boundaries.
+
 ## Run
 
 From the repository root:

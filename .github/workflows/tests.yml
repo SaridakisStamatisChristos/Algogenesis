@@ -140,6 +140,37 @@ jobs:
           name: algogenesis-v32-composition-and-fusion
           path: v32_*.json
           if-no-files-found: error
+      - name: Generate and falsify four v3.3 head-tail one-pass algorithms
+        if: matrix.python-version == '3.13'
+        run: |
+          set -e
+          for task in count_max count_min sum_max sum_min; do
+            python genome_headtail_v33.py --task "$task" --output "v33_$task.json" > /dev/null
+          done
+          python - <<'PY'
+          import json
+          for task in ('count_max','count_min','sum_max','sum_min'):
+              record=json.load(open('v33_'+task+'.json',encoding='utf-8'))
+              assert record['status']=='empirically_validated'
+              assert record['generated_candidates']==768
+              assert record['correct_training_validation']>0
+              assert record['heldout_cases']==51
+              assert record['heldout_only_for_reporting']
+              assert record['heldout_operations'][0]<record['v32_fused_comparisons']
+              assert record['heldout_operations'][1]<record['v32_fused_steps']
+              assert record['heldout_operations'][0]<=record['strong_one_pass_reference_comparisons']*1.15
+              assert not record['global_sota_claim']
+              assert not record['universal_formal_verification']
+              print(task, record['heldout_operations'],
+                    record['strong_one_pass_reference_comparisons'])
+          PY
+      - name: Upload v3.3 one-pass generation research evidence
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v33-headtail
+          path: v33_*.json
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30
