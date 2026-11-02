@@ -1,8 +1,34 @@
-# AlgoGenesis v0.6 — Algorithm Discovery Research Laboratory
+# AlgoGenesis — Algorithm Discovery Research Laboratory
 
 AlgoGenesis is a **bounded research prototype**, not a general algorithm-discovery system and not an established SOTA result. This repository includes the sorting-network search tracks, integer-expression CEGIS, a bounded register-machine interpreter, and two loop-synthesis tracks.
 
 **Python:** 3.10+; no external dependencies.
+
+## v2.9 — Algorithm invention track (primary research objective)
+
+AlgoGenesis now has a dedicated **algorithm-generation** entry point,
+`algorithm_invention_v29.py`, distinct from its v2.4–v2.8 SyGuS
+subsystem. The first research target is grammar-generated **parallel
+sorting networks**. It enumerates stage structures (non-overlapping
+comparators), uses bounded semantic search without seeding a known
+network, and checks all binary inputs with bit-parallel and
+independent scalar interpreters.
+
+Default width-6 target: discover <=12 comparators in <=5 parallel
+stages, improving the repository's 15-comparator, depth-9 bubble
+baseline. These dimensions are well-known prior art, **not a
+mathematical novelty or universal SOTA claim**. The innovation
+is a reproducible discovery route in this repository.
+
+```bash
+python algorithm_invention_v29.py --width 6 --stages 5 --comparators 12 --beam 256 --output invention_v29_width6.json
+python -m unittest discover -s tests -v
+```
+
+Further goals: typed algorithm genomes, recurrence and data-structure
+synthesis, independent correctness gates, Pareto performance discovery,
+and held-out algorithm tasks. See
+`research/v29_algorithm_invention.md` for the full evidence contract.
 
 ## Run
 
