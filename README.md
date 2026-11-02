@@ -224,3 +224,7 @@ The new modules switching_experts.py and tracking_benchmark.py add exact-rationa
 ## v2.4 — External SyGuS CLIA synthesis and universal integer certificates
 
 The new modules sygus_clia.py and sygus_benchmark.py parse a restricted part of the SyGuS language, synthesize decision trees from source constraints, and certify them over all integer inputs by an exact weak-order-region argument. Four selected public SyGuS-Org CLIA benchmarks (max2, max3, max4, diff) pass the restricted verifier, with 13, 75, 541 and 13 order cells, respectively. These are **selected examples, not SOTA**. See research/v24_sygus_integer_synthesis.md for provenance, proof, limitations and reproducible commands.
+
+## v2.5 — Text-level SyGuS solution verification
+
+The dependency-free module sygus_solution_checker.py parses emitted define-fun solution text into a fresh AST, validates the signature and limited syntax, then calls the exact all-integer order-region verifier. This detects serialization, signature, mutation and text/AST mismatches and also supports checking other solvers' solutions within the restricted grammar. It is **not** an independently implemented theorem prover or a full SyGuS checker. Run: python -m unittest discover -s tests -q.
