@@ -395,6 +395,17 @@ def discover(task: str = 'contains', *, limit: int = 10000, seed: int = 731) -> 
     cost_cases = (tuple(((-9,) + (1,) * n, -9) for n in (4, 8, 16, 32, 64))
                   + tuple(((1,) * n + (-9,), -9) for n in (4, 8, 16, 32, 64))
                   + tuple(((1,) * n, -9) for n in (4, 8, 16, 32, 64)))
+    # Ensure actual set disjointness, not merely independently seeded RNGs.
+    # Shift both array values and key together to preserve equality patterns.
+    used = set(cases) | set(validation) | set(cost_cases)
+    unique_heldout = []
+    for values, key in heldout:
+        while (values, key) in used:
+            values = tuple(value + 4096 for value in values)
+            key += 4096
+        used.add((values, key))
+        unique_heldout.append((values, key))
+    heldout = unique_heldout
     vm = Machine()
     avg_length = sum(len(v) for v, _ in heldout) / len(heldout)
     baseline = avg_length if task in ('contains', 'count') else 0.0
