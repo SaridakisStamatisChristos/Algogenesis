@@ -1,0 +1,91 @@
+{
+  "width": 4,
+  "trials": 12,
+  "successes": 12,
+  "results": [
+    {
+      "seed": 0,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16575
+    },
+    {
+      "seed": 1,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16540
+    },
+    {
+      "seed": 2,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 17003
+    },
+    {
+      "seed": 3,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 17088
+    },
+    {
+      "seed": 4,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16765
+    },
+    {
+      "seed": 5,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16742
+    },
+    {
+      "seed": 6,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 17142
+    },
+    {
+      "seed": 7,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16914
+    },
+    {
+      "seed": 8,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16821
+    },
+    {
+      "seed": 9,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 17011
+    },
+    {
+      "seed": 10,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16812
+    },
+    {
+      "seed": 11,
+      "found": true,
+      "comparators": 5,
+      "errors": 0,
+      "evaluations": 16599
+    }
+  ]
+}
