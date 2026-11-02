@@ -18,7 +18,7 @@ class StructuralMaxTests(unittest.TestCase):
     def test_max5_max6_exact_external_and_large_inputs(self):
         for n in (5,6):
             with self.subTest(n=n):
-                source = (PINN / f'max{n}.sl').read_text(encoding='utf-8')
+                source = (PINNED / f'max{n}.sl').read_text(encoding='utf-8')
                 problem = parse_problem(source)
                 candidate = synthesize_structural_max(problem)
                 self.assertIsNotNone(candidate)
@@ -40,14 +40,14 @@ class StructuralMaxTests(unittest.TestCase):
                                      'proved')
 
     def test_all_zero_or_equal_and_nondeterministic_tree_not_assumed(self):
-        source=(PINN/'max5.sl').read_text()
+        source=(PINNED/'max5.sl').read_text()
         problem=parse_problem(source)
         candidate=synthesize_structural_max(problem)
         self.assertEqual(candidate.tree.at((3,3,3,3,3)),3)
         self.assertEqual(candidate.tree.at((3,3,4,4,3)),4)
 
     def test_reject_constraint_mutations_and_partial_specification(self):
-        source=(PINN/'max5.sl').read_text()
+        source=(PINNED/'max5.sl').read_text()
         original=parse_problem(source)
         self.assertIsNotNone(synthesize_structural_max(original))
         cases=[
@@ -63,16 +63,16 @@ class StructuralMaxTests(unittest.TestCase):
 
     def test_reject_unsupported_arity_and_non_max_contracts(self):
         for name in ('small.sl',):
-            problem = parse_problem((PINN/name).read_text())
+            problem = parse_problem((PINNED/name).read_text())
             self.assertIsNone(synthesize_structural_max(problem))
         for name in ('max7.sl','max8.sl'):
             with self.assertRaises(Unsupported):
-                parse_problem((PINN/name).read_text())
+                parse_problem((PINNED/name).read_text())
 
     def test_incorrect_max_candidate_has_real_smt_counterexample(self):
         if not shutil.which('z3'):
             self.skipTest('Z3 required for counterexample')
-        source=(PINN/'max5.sl').read_text()
+        source=(PINNED/'max5.sl').read_text()
         bad='(define-fun max5 ((x Int) (y Int) (z Int) (w Int) (u Int)) Int x)'
         result=check_with_smt(source,bad,solver='z3')
         self.assertEqual(result.status,'counterexample',result)
