@@ -260,29 +260,28 @@ timeouts, absence and malformed responses. See
 research/v26_independent_smt_validation.md for threat model and evidence
 boundaries. Comparative SOTA remains **unverified**.
 
-## v2.7 — Structural maximum synthesis and frozen comparative SyGuS harness
+## v2.7 — Scalable maximum-family synthesis and independent baseline validation
 
-`structural_max.py` recognizes the **exact declarative integer maximum
-contract** (every input is a lower bound, output equals some input) and
-constructs a comparison tree for **2–6 variables**. The theorem establishing
-uniqueness is straightforward, but this is a **specialized** synthesis path
-with exponentially growing AST size, not general-purpose invention. The
-previous general bounded CEGIS path remains limited to 1–4 inputs.
+The exact-maximum contract recognizer derives unique maximum semantics from
+source bounds and equality-to-an-input constraints. Two specialized forms
+are available: the original decision tree for 2–6 inputs, and a linear-size
+shared "let" comparison fold for 2–16 inputs (used by the v2.7 benchmark
+for max7/max8/max16). Its n−1 comparisons and O(n) emitted expressions
+avoid the original decision-tree's exponential AST duplication. Both
+variants receive independent Z3 checks before counting as proved.
 
-`benchmark_v27.py` runs AlgoGenesis and optional cvc5 on an eleven-task
-SyGuS-Org selection, with source-byte SHA verification, subprocess timeouts,
-separate correctness validation by Z3, and preserved negative results.
-Original four cases and newly vendored max5/max6/max7/max8/small/VC22_a/
-VC22_b deliberately expose both coverage gains and unsupported cases.
-This is a curated smoke corpus, **not representative SyGuS-Comp coverage**.
+The frozen comparative corpus now includes 12 pinned official SyGuS tasks
+including max16, with byte-level provenance validation, isolated subprocess
+timeouts for AlgoGenesis and cvc5, independent Z3 checks of both engines,
+and raw CI artifacts. A separate verification-only SMT translator accepts
+cvc5's 'let', arithmetic guards, multiple definitions and source helper
+functions; this does not enlarge AlgoGenesis' general synthesis grammar.
 
     python -m unittest discover -s tests -v
     python structural_max.py benchmarks/sygus_clia_v27/max5.sl
     python benchmark_v27.py --timeout 5 --repeats 3 --output benchmark_v27_results.json
 
-GitHub Actions runs an eleven-task one-repetition comparison and requires
-independent Z3 UNSAT proofs for max5 and max6. cvc5 is optional and lack of
-its binary is reported explicitly. The stored suite manifest, proof
-argument, falsification criteria and limitations are in
-`research/v27_generalization_benchmark.md`. No comparative SOTA claim is
-made from this result.
+The general bounded CEGIS algorithm remains limited to 1–4 input
+variables. The max-fold is a specialized known algebraic family, NOT general
+algorithm invention or comparative SOTA. Full selection, proof obligations,
+negative results and limitations: research/v27_generalization_benchmark.md.
