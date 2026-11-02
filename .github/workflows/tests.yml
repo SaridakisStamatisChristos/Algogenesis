@@ -349,6 +349,33 @@ jobs:
           name: algogenesis-v39-striped-summary
           path: native_v39_evidence/v3*
           if-no-files-found: error
+      - name: Synthesize an algorithm from an external task specification
+        if: matrix.python-version == '3.13'
+        run: |
+          python spec_synthesis_v40.py --spec examples/positive_even_sum_v40.json --output-dir v40_evidence
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('v40_evidence')
+          r=json.loads((root/'v40_positive_even_sum.json').read_text())
+          assert r['status']=='finite_spec_synthesis_complete'
+          assert r['grammar_proposals']==4840 and r['training_validation_survivors']>0
+          assert r['holdout_cases']==30 and r['challenge_cases']==65
+          assert r['native_verification']['optimized']=='passed'
+          assert r['native_verification']['ubsan']=='passed'
+          assert r['native_verification']['cases']==127
+          assert (root/'v40_positive_even_sum.c').exists()
+          assert not r['global_novelty_claim'] and not r['global_sota_claim']
+          PY
+      - name: Publish v4.0 specification, generated C and validation evidence
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogenesis-v40-spec-synthesis
+          path: |
+            examples/positive_even_sum_v40.json
+            v40_evidence/v40_*
+          if-no-files-found: error
       - name: Independently verify four pinned SyGuS candidates
         if: matrix.python-version == '3.13'
         run: python sygus_smt_bridge.py --all --solver z3 --timeout 30

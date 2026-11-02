@@ -4,6 +4,29 @@ AlgoGenesis is a **bounded research prototype**, not a general algorithm-discove
 
 **Python:** 3.10+; no external dependencies.
 
+## v4.0 — Generate a program from a task specification
+
+`spec_synthesis_v40.py` accepts a JSON task with labeled examples for
+training, validation, challenge, and a sealed holdout. It enumerates a
+task-independent grammar of typed streaming programs, rejects programs
+with counterexamples, and emits the selected AST and standalone C11.
+The CLI compiles the C with GCC at `-O3` and with UBSan, then checks every
+labeled case before recording success.
+
+```bash
+python spec_synthesis_v40.py --spec examples/positive_even_sum_v40.json --output-dir v40_generated
+```
+
+Each case has `values` (an array of signed 64-bit integers), `key` (a
+signed 64-bit input), and `expected` (a signed 64-bit result). The
+example asks for the sum of positive values at even indices. The task
+name is just a label; the generator has no name-based solution routing.
+Python users may also supply a bounded reference oracle through
+`synthesize(..., oracle=..., oracle_domain=...)` for additional CEGIS
+counterexamples. Generated output is limited to this grammar and finite
+checks, with no universal correctness, literature novelty, or SOTA claim.
+See `research/v40_spec_driven_synthesis.md` for the search and tests.
+
 ## v2.9 — Algorithm invention track (primary research objective)
 
 AlgoGenesis now has a dedicated **algorithm-generation** entry point,
