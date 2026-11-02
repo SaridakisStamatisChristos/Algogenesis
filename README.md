@@ -220,3 +220,7 @@ Run `python -m unittest discover -s tests -q`.
 ## v2.3 — Fixed-Share tracking regret with causal ARIMA/ETS benchmarks
 
 The new modules switching_experts.py and tracking_benchmark.py add exact-rational Fixed-Share tracking, a proven bound against expert paths with switches, an exact offline dynamic-programming comparator, and historical comparisons against persistence, ARIMA(1,1,0), simple exponential smoothing, and Holt trend smoothing. The tracking algorithm wins on a constructed changing-expert sequence but loses to statistical baselines on all five tested historical series. **No general SOTA result is claimed.** Reproduction, proof, negative results and evidence ledger: research/v23_switching_regret.md and research/v23_tracking_results.json.
+
+## v2.4 — External SyGuS CLIA synthesis and universal integer certificates
+
+The new modules sygus_clia.py and sygus_benchmark.py parse a restricted part of the SyGuS language, synthesize decision trees from source constraints, and certify them over all integer inputs by an exact weak-order-region argument. Four selected public SyGuS-Org CLIA benchmarks (max2, max3, max4, diff) pass the restricted verifier, with 13, 75, 541 and 13 order cells, respectively. These are **selected examples, not SOTA**. See research/v24_sygus_integer_synthesis.md for provenance, proof, limitations and reproducible commands.
