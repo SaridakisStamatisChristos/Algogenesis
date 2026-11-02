@@ -6,7 +6,7 @@ cross-language semantics contract. Reject unsupported operations.
 from __future__ import annotations
 from dataclasses import fields
 import re
-from algorithm_genome_v30 import Expr, Stmt, Genome, type_check
+from algorithm_genome_v30 import Expr, Stmt, Genome, type_check, InvalidGenome
 
 IDENT=re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
 MIN64=-(1<<63)
@@ -49,7 +49,10 @@ def decode_genome(raw:dict)->Genome:
         regs.append((item[0],item[1],expr(item[2])))
     genome=Genome(tuple(regs),tuple(stmt(s) for s in raw['statements']),
                   expr(raw['result']),raw['output_type'])
-    type_check(genome)
+    try:
+        type_check(genome)
+    except InvalidGenome as exc:
+        raise UnsupportedNativeGenome('ill-typed serialized genome') from exc
     return genome
 
 
