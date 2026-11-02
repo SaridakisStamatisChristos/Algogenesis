@@ -55,10 +55,11 @@ class StructuralMaxTests(unittest.TestCase):
             source.replace('(>= (max5 x y z w u) u)', '(>= (max5 x y z w u) w)'),
             source.replace('(>= (max5 x y z w u) u)', '(>= (max5 x y z w u) (+ u 1))'),
             source.replace('(check-synth)', '(constraint (>= (max5 x y z w u) 100))\n(check-synth)'),
-            source.replace('(or (= u (max5 x y z w u))', '(or (= x (max5 x y z w u))'),
+            source.replace('(= u (max5 x y z w u))', '(= x (max5 x y z w u))'),
         ]
         for idx,case in enumerate(cases):
             with self.subTest(case=idx):
+                self.assertNotEqual(case, source, 'mutation must modify source text')
                 self.assertIsNone(synthesize_structural_max(parse_problem(case)))
 
     def test_reject_unsupported_arity_and_non_max_contracts(self):
