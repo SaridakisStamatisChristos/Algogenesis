@@ -228,3 +228,34 @@ The new modules sygus_clia.py and sygus_benchmark.py parse a restricted part of 
 ## v2.5 — Text-level SyGuS solution verification
 
 The dependency-free module sygus_solution_checker.py parses emitted define-fun solution text into a fresh AST, validates the signature and limited syntax, then calls the exact all-integer order-region verifier. This detects serialization, signature, mutation and text/AST mismatches and also supports checking other solvers' solutions within the restricted grammar. It is **not** an independently implemented theorem prover or a full SyGuS checker. Run: python -m unittest discover -s tests -q.
+
+
+## v2.6 — Independent Z3/cvc5 SyGuS solution cross-check
+
+The new **sygus_smt_bridge.py** provides a **second, external** verification
+path for the existing restricted CLIA subset. It validates source and candidate
+syntax, generates an SMT-LIB 2 QF_LIA query from the **original constraints**
+and a reparsed solution, and asks Z3 or cvc5 if the **negation of their
+conjunction** is satisfiable. An UNSAT result is independent confirmation of
+validity for all integer inputs; SAT means a violating input exists. UNKNOWN,
+missing solver, timeout, malformed response, or nonzero exit are **not proofs**.
+
+The encoder and parser are Python code and have not been formally verified;
+the solver is an independent engine, not an independent implementation of the
+entire SyGuS-IF language. This applies only to the input fragment accepted by
+sygus_clia.py and sygus_solution_checker.py. The external check is not an
+independent proof of discovery optimality, grammar completeness, synthesis
+generality, or SOTA performance.
+
+Install Z3 or cvc5 on your PATH (optional for ordinary repository use):
+
+    python sygus_smt_bridge.py --all --solver z3 --timeout 30
+    python sygus_smt_bridge.py benchmarks/sygus_clia/max2.sl --solver cvc5
+    python sygus_smt_bridge.py benchmarks/sygus_clia/max2.sl --solution solution.sl --solver z3
+
+GitHub Actions provisions Z3 on the Python 3.13 leg and treats any result
+other than four externally verified candidates as a failure. Local tests
+cover positive and deliberately incorrect candidates as well as subprocess
+timeouts, absence and malformed responses. See
+research/v26_independent_smt_validation.md for threat model and evidence
+boundaries. Comparative SOTA remains **unverified**.
