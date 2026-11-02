@@ -212,3 +212,7 @@ particular, a sufficiently high-order model can overfit a short trace.
 No general nonlinear state inference or SOTA claim is made.
 
 Run `python -m unittest discover -s tests -q`.
+
+## v2.2 — bounded online experts, stability gate and falsification
+
+`regret_forecast.py` adds a known, rigorously bounded multiplicative-weights expert-advice method using exact rational loss updates with two explicit quantization grids. `stability_selector.py` adds a distinct empirical selection strategy, and `regret_benchmark.py` compares the candidates on synthetic and five historical statsmodels series. The mathematical regret bound is restricted to predeclared bounded outcomes; it is **not forecasting SOTA**. Several real-data and synthetic comparisons favor simpler methods. See `research/v22_regret_and_falsification.md` for the proof, negative results and replication protocol.
