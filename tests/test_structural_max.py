@@ -4,7 +4,7 @@ import itertools
 import random
 import unittest
 
-from structural_max import synthesize_structural_max
+from structural_max import synthesize_structural_max, synthesize_linear_max
 from sygus_clia import (parse_problem, Unsupported, certify, Affine, Tree,
                          synthesize, output, Result)
 from sygus_smt_bridge import check_with_smt
@@ -66,9 +66,18 @@ class StructuralMaxTests(unittest.TestCase):
         for name in ('small.sl',):
             problem = parse_problem((PINNED/name).read_text())
             self.assertIsNone(synthesize_structural_max(problem))
-        for name in ('max7.sl','max8.sl'):
-            with self.assertRaises(Unsupported):
-                parse_problem((PINNED/name).read_text())
+        for name in ('max7.sl','max8.sl','max16.sl'):
+            p=parse_problem((PINNED/name).read_text())
+            self.assertIsNone(synthesize_structural_max(p))
+            fold=synthesize_linear_max(p)
+            self.assertIsNotNone(fold)
+            self.assertEqual(fold.comparisons,len(p.variables)-1)
+            self.assertLess(fold.source_bytes,5000)
+            self.assertEqual(fold.rule,'linear-let-max-fold')
+            if shutil.which('z3'):
+                from sygus_general_checker import check_external_solution
+                verdict=check_external_solution((PINNED/name).read_text(),fold.solution)
+                self.assertEqual(verdict.status,'proved',verdict)
 
     def test_incorrect_max_candidate_has_real_smt_counterexample(self):
         if not shutil.which('z3'):
