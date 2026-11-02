@@ -144,6 +144,38 @@ See \`research/v33_headtail_synthesis.md\` for the invariant proof
 obligations, external benchmark limitations, adversarial tests
 and honest novelty boundaries.
 
+## v3.4 — Native C generation and independent performance evaluation
+
+The v3.3 comparison-count improvement has now been subjected to an
+actual **native compiler and CPU timing** gate. \`native_codegen_v34.py\`
+compiles generated typed, read-only algorithm genomes to bounded C11
+integer functions; \`native_benchmark_v34.py\` tests the compiled code
+against independent two-pass correctness oracles, two strong one-pass
+C implementations (equality-first and better-first), and UBSan.
+
+Rather than optimizing for an easily gamed VM step count, v3.4
+publishes **all native timing cells, including cases where our
+generated algorithm loses**. In a preliminary GCC 14.2 \`-O3\`
+run, all four generated extrema-aggregators were slower in the
+median than the fastest of two strong one-pass C comparators.
+Thus v3.3's favorable modeled-comparison result **did not establish
+hardware speed superiority**. This negative finding is the basis
+for future native-guided optimization, not a reason to suppress data.
+
+The compiler deliberately rejects mutable arrays and unsupported
+types/operators; arithmetic equivalence holds only in the int64
+nonoverflow test domain. Python 3.10 and 3.13 tests remain the base
+regression gate.
+
+\`\`\`bash
+python genome_headtail_v33.py --task count_max --output v33_count_max.json
+python native_benchmark_v34.py --task count_max \
+  --genome-json v33_count_max.json --output-dir native_v34_evidence
+\`\`\`
+
+See \`research/v34_native_codegen_benchmarks.md\` for full
+methodology, limitations, toolchain, strong comparator and next steps.
+
 ## Run
 
 From the repository root:
