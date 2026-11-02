@@ -377,11 +377,21 @@ def discover(task: str = 'contains', *, limit: int = 10000, seed: int = 731) -> 
         raise ValueError('invalid search arguments')
     cases = tuple(all_training_cases())
     rng = random.Random(seed)
-    heldout = [(tuple(rng.randint(-7, 7) for _ in range(n)), rng.randint(-7, 7))
+    validation = [(tuple(rng.randint(-7, 7) for _ in range(n)), rng.randint(-7, 7))
+                  for n in (0, 1, 2, 4, 8, 16, 32, 64) for _ in range(4)]
+    validation.extend((tuple([key] * n), key) for n in (1, 2, 8, 32, 64)
+                      for key in (-9, 0, 9))
+    validation.extend((tuple(range(n)), n + 1) for n in (1, 8, 32, 64))
+    # Truly held-out: generated from a different seed/range; not used for
+    # candidate filtering, cost ranking or tie breaking.
+    hold_rng = random.Random(seed + 1009)
+    heldout = [(tuple(hold_rng.randint(-101, 101) for _ in range(n)),
+                hold_rng.randint(-101, 101))
                for n in (0, 1, 2, 4, 8, 16, 32, 64) for _ in range(4)]
-    heldout.extend((tuple([key] * n), key) for n in (1, 2, 8, 32, 64) for key in (-9, 0, 9))
-    heldout.extend((tuple(range(n)), n + 1) for n in (1, 8, 32, 64))
-    # Optimization workload never contains held-out acceptance cases.
+    heldout.extend((tuple([key] * n), key) for n in (1, 2, 8, 32, 64)
+                   for key in (-93, 0, 93))
+    heldout.extend((tuple(range(n)), n + 11) for n in (1, 8, 32, 64))
+    # Optimization workload is separate from validation and held-out cases.
     cost_cases = (tuple(((-9,) + (1,) * n, -9) for n in (4, 8, 16, 32, 64))
                   + tuple(((1,) * n + (-9,), -9) for n in (4, 8, 16, 32, 64))
                   + tuple(((1,) * n, -9) for n in (4, 8, 16, 32, 64)))
@@ -404,7 +414,7 @@ def discover(task: str = 'contains', *, limit: int = 10000, seed: int = 731) -> 
                         else execution.value) == oracle(task, v, k)
             if any(not accepted(v, k) for v, k in cases):
                 continue
-            if any(not accepted(v, k) for v, k in heldout):
+            if any(not accepted(v, k) for v, k in validation):
                 continue
             valid += 1
             cost = sum((vm.run(candidate, v, k).writes if task == 'clamp'
@@ -415,6 +425,14 @@ def discover(task: str = 'contains', *, limit: int = 10000, seed: int = 731) -> 
                 best, best_score = candidate, score
         except (InvalidGenome, FuelExhausted, IndexError):
             continue
+    if best is not None:
+        for v, k in heldout:
+            execution = vm.run(best, v, k)
+            actual = execution.final_array if task == 'clamp' else execution.value
+            if actual != oracle(task, v, k):
+                return Discovery(task, None, total, valid, len(heldout),
+                                 None, baseline, None, baseline_writes,
+                                 'heldout_failed')
     mean_comparisons = (sum(vm.run(best, v, k).comparisons for v, k in heldout) / len(heldout)
                         if best is not None else None)
     mean_writes = (sum(vm.run(best, v, k).writes for v, k in heldout) / len(heldout)
