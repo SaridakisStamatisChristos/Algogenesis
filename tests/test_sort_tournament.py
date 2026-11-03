@@ -22,4 +22,24 @@ class SortingTournamentTests(unittest.TestCase):
                 for name,sort in CANDIDATES.items():
                     with self.subTest(n=n,algorithm=name):
                         self.assertEqual(sort(xs),sorted(xs))
+    def test_three_way_ordered_and_nearly_ordered(self):
+        from experiments.sort_tournament import three_way_blocks
+        for n in (0, 1, 2, 23, 24, 25, 1000, 10000):
+            cases = [
+                list(range(n)),
+                list(range(n, 0, -1)),
+                [5] * n,
+                [i // 3 for i in range(n)],
+                [i // 3 for i in range(n - 1, -1, -1)],
+            ]
+            if n >= 3:
+                almost = list(range(n))
+                almost[0], almost[-1] = almost[-1], almost[0]
+                cases.append(almost)
+            for values in cases:
+                with self.subTest(n=n, first=values[:3]):
+                    original = values[:]
+                    self.assertEqual(three_way_blocks(values), sorted(values))
+                    self.assertEqual(values, original)
+
 if __name__=="__main__":unittest.main()
