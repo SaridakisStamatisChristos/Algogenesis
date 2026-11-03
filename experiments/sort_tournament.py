@@ -43,7 +43,7 @@ def sparse_distribution(values, max_ratio=8):
 def three_way_blocks(values, cutoff=24):
     """Adaptive iterative three-way introsort with ordered-input fast paths.
 
-    Median-of-three partitioning, insertion-sort leaves, and bounded-depth
+    Median-of-three block partitioning, insertion-sort leaves, and bounded-depth
     merge fallback. Worst-case O(n log n) time; fresh-list result.
     """
     a = list(values)
@@ -90,18 +90,16 @@ def three_way_blocks(values, cutoff=24):
             pivot = y if y < z else (z if x < z else x)
         else:
             pivot = x if x < z else (z if y < z else y)
-        lt = i = lo
-        gt = hi
-        while i < gt:
-            if a[i] < pivot:
-                a[lt], a[i] = a[i], a[lt]
-                lt += 1
-                i += 1
-            elif a[i] > pivot:
-                gt -= 1
-                a[i], a[gt] = a[gt], a[i]
-            else:
-                i += 1
+        # Python-level element swapping is expensive. Partition the current
+        # block with C-backed list-comprehension loops, then write it back.
+        # This trades bounded temporary memory for lower interpreter overhead.
+        block = a[lo:hi]
+        lower = [v for v in block if v < pivot]
+        equal = [v for v in block if v == pivot]
+        upper = [v for v in block if v > pivot]
+        lt = lo + len(lower)
+        gt = lt + len(equal)
+        a[lo:hi] = lower + equal + upper
         # Process smaller partition first to limit explicit stack growth.
         left = (lo, lt, depth - 1)
         right = (gt, hi, depth - 1)
