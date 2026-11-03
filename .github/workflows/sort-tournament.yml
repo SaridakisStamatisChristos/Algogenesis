@@ -1,0 +1,38 @@
+name: Sorting tournament CI
+on:
+  push:
+    branches:
+      - experiment/r7-sol32k-1m-sort
+  pull_request:
+    paths:
+      - 'experiments/**'
+      - 'tests/test_sort_tournament.py'
+      - '.github/workflows/sort-tournament.yml'
+  workflow_dispatch:
+
+jobs:
+  tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile tournament
+        run: python -m compileall -q experiments tests/test_sort_tournament.py
+      - name: Exhaustive and adversarial verification
+        run: python -m unittest discover -s tests -p 'test_sort_tournament.py' -v
+      - name: Benchmark tournament
+        run: python -m experiments.benchmark_sort_tournament --sizes 100 1000 10000 --repeats 11 --seed 1729 > sort_tournament_results.json
+      - name: Upload benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sorting-tournament-py${{ matrix.python-version }}
+          path: sort_tournament_results.json
+          if-no-files-found: warn
