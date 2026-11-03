@@ -5,11 +5,16 @@ def run_merge(values):
     """Natural nondecreasing runs; stable iterative pairwise merge, O(n log n) worst."""
     a=list(values)
     if len(a)<2:return a
-    runs=[]; start=0
-    for i in range(1,len(a)):
-        if a[i]<a[i-1]:
-            runs.append(a[start:i]);start=i
-    runs.append(a[start:])
+    runs=[]; start=0; n=len(a)
+    while start<n:
+        end=start+1
+        if end<n and a[end]<a[start]:
+            while end<n and a[end]<a[end-1]:end+=1
+            runs.append(a[start:end][::-1])
+        else:
+            while end<n and a[end]>=a[end-1]:end+=1
+            runs.append(a[start:end])
+        start=end
     while len(runs)>1:
         merged=[]
         for k in range(0,len(runs),2):
