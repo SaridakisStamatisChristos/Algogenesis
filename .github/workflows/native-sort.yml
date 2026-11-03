@@ -1,0 +1,33 @@
+name: Native sorting research
+on:
+  push:
+    branches: [experiment/r7-sol32k-1m-sort]
+    paths:
+      - 'experiments/native_sort_tournament.cpp'
+      - '.github/workflows/native-sort.yml'
+  pull_request:
+    paths:
+      - 'experiments/native_sort_tournament.cpp'
+      - '.github/workflows/native-sort.yml'
+  workflow_dispatch:
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile with warnings
+        run: ${{ matrix.compiler }} -std=c++17 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -o /tmp/native-sort experiments/native_sort_tournament.cpp
+      - name: Correctness and performance tournament
+        run: /tmp/native-sort 11 1729 > native_sort_results.csv
+      - name: Upload raw samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-sort-${{ matrix.compiler }}
+          path: native_sort_results.csv
+          if-no-files-found: error
