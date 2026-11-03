@@ -60,6 +60,21 @@ static void sparse(V& a) {
     for(size_t k=0;k<count.size();++k)
         for(size_t c=count[k];c>0;--c)a[i++]=static_cast<int64_t>(static_cast<uint64_t>(lo)+k);
 }
+// Hybrid candidate: preserve three-way partitioning for sparse domains,
+// dispatch to bounded counting when the exact integer range is economical.
+// Keep the original three_way candidate as an independent control.
+static void adaptive_three_way(V& a) {
+    if(a.size()<2048){three_way(a);return;}
+    auto [l,h]=std::minmax_element(a.begin(),a.end());
+    const uint64_t range=static_cast<uint64_t>(*h)-static_cast<uint64_t>(*l);
+    // Cap counting storage at ~8 MiB; avoid integer overflow and allocation
+    // blowups on extreme signed values.
+    if(range<=static_cast<uint64_t>(a.size())*4ULL && range<=1000000ULL){
+        sparse(a);
+    }else{
+        three_way(a);
+    }
+}
 static void run_merge(V& a){
     if(a.size()<2)return;
     // Detect monotone runs; stable_sort handles general merging in native code.
@@ -78,7 +93,7 @@ int main(int argc,char** argv){
     if(argc>2)seed=std::stoull(argv[2]);
     if(repeats<3 || repeats>1000)throw std::invalid_argument("repeats must be 3..1000");
     std::mt19937_64 rng(seed);
-    const std::vector<std::string> names={"three_way","sparse_distribution","run_merge","std_sort","std_stable_sort"};
+    const std::vector<std::string> names={"three_way","adaptive_three_way","sparse_distribution","run_merge","std_sort","std_stable_sort"};
     std::cout<<"n,workload,algorithm,median_ns,samples_ns\n";
     for(size_t n:{size_t(100),size_t(1000),size_t(10000),size_t(100000),size_t(1000000)}){
         for(std::string workload:{"random","sorted","reverse","duplicates","wide_range"}){
@@ -98,10 +113,11 @@ int main(int argc,char** argv){
                 auto start=Clock::now();
                 switch(which){
                     case 0:three_way(a);break;
-                    case 1:sparse(a);break;
-                    case 2:run_merge(a);break;
-                    case 3:std::sort(a.begin(),a.end());break;
-                    case 4:std::stable_sort(a.begin(),a.end());break;
+                    case 1:adaptive_three_way(a);break;
+                    case 2:sparse(a);break;
+                    case 3:run_merge(a);break;
+                    case 4:std::sort(a.begin(),a.end());break;
+                    case 5:std::stable_sort(a.begin(),a.end());break;
                 }
                 auto ns=std::chrono::duration<double,std::nano>(Clock::now()-start).count();
                 if(a!=expected)throw std::runtime_error("correctness failure: "+names[which]);
